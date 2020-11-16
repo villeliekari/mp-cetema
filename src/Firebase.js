@@ -1,7 +1,7 @@
 import * as firebase from 'firebase';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCEcNmUPjxmjapyufPOWFkc7z66xn8QVh0",
+    apiKey: process.env.FIREBASE_API_KEY,
     authDomain: "cetema-project.firebaseapp.com",
     databaseURL: "https://cetema-project.firebaseio.com",
     projectId: "cetema-project",

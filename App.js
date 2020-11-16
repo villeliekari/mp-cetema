@@ -8,7 +8,7 @@ const App = () => {
   return (
     <>
       <StatusBar
-        backgroundColor={colors.darkPrimary}
+        backgroundColor={colors.dark.primary}
       />
       <Navigation />
     </>

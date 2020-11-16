@@ -17,8 +17,8 @@ const InfoStack = createStackNavigator();
 const InfoStackScreen = () => {
   return (
     <InfoStack.Navigator screenOptions={{
-      headerStyle: { backgroundColor: colors.darkPrimary },
-      headerTintColor: colors.darkTint
+      headerStyle: { backgroundColor: colors.dark.primary },
+      headerTintColor: colors.dark.tint
     }}>
       <InfoStack.Screen name="Info" component={InfoScreen} />
       <InfoStack.Screen name="Weather" component={InfoScreen} />
@@ -33,8 +33,8 @@ const SettingsStack = createStackNavigator();
 const SettingsStackScreen = () => {
   return (
     <SettingsStack.Navigator screenOptions={{
-      headerStyle: { backgroundColor: colors.darkPrimary },
-      headerTintColor: colors.darkTint
+      headerStyle: { backgroundColor: colors.dark.primary },
+      headerTintColor: colors.dark.tint
     }}>
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
       <SettingsStack.Screen name="Theme" component={SettingsScreen} />
@@ -49,10 +49,10 @@ const Navigation = () => {
   return (
     <NavigationContainer>
       <Tab.Navigator tabBarOptions={{
-        activeTintColor: colors.accent,
-        activeBackgroundColor: colors.darkSecondary,
-        inactiveBackgroundColor: colors.darkPrimary,
-        inactiveTintColor: colors.darkTint,
+        activeTintColor: colors.dark.accent,
+        activeBackgroundColor: colors.dark.secondary,
+        inactiveBackgroundColor: colors.dark.primary,
+        inactiveTintColor: colors.dark.tint,
       }}>
         <Tab.Screen name="Map" component={MainScreen} options={{
           tabBarIcon: ({ tintColor }) => <MaterialCommunityIcons name="map" color={tintColor} size={32} />
