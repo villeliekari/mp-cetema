@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { LogBox } from 'react-native';
 import * as Expo from "expo";
 import * as Font from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import Navigation from './src/helpers/Navigator';
 
 const App = () => {
+  LogBox.ignoreLogs(['Setting a timer']);
   const [fontReady, setFontReady] = useState(false);
   const loadFonts = async () => {
     await Font.loadAsync({

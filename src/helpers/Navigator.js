@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from 'native-base';
 import fb from './Firebase';
-import { colors } from '../variables/GlobalVariables';
+import { colors } from './GlobalVariables';
 import AuthScreen from '../screens/AuthScreen';
 import MainScreen from '../screens/MainScreen';
 import InfoScreen from '../screens/InfoScreen';

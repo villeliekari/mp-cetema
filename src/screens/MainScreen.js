@@ -1,18 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from 'native-base';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { mapStyleDark } from '../variables/MapStyleDark';
+import { mapStyleDark } from '../styles/MapStyleDark';
+
+import fb from '../helpers/Firebase';
 
 const MainScreen = () => {
   const [shipLocations, setShipLocations] = useState(null);
   const [shipMetadata, setShipMetadata] = useState(null);
-  const [markers, setMarkers] = useState([]);
+  const [userLocations, setUserLocations] = useState(null);
+  const [shipMarkers, setShipMarkers] = useState([]);
+  const [userMarkers, setUserMarkers] = useState([]);
 
   const fetchData = async () => {
-    console.log("Updating fetchdata...")
+    console.log("Fetching data...")
     const success = res => res.ok ? res.json() : Promise.resolve({});
     const locations = fetch('https://meri.digitraffic.fi/api/v1/locations/latest').then(success);
     const metadata = fetch('https://meri.digitraffic.fi/api/v1/metadata/vessels').then(success);
+
+    fb.database().ref('/userLocations').orderByKey().once('value').then(snap => {
+      let userLocationsData = [];
+      snap.forEach(childSnap => {
+        userLocationsData.push(childSnap.val())
+      })
+      setUserLocations(userLocationsData);
+    });
 
     try {
       const [locationsFetch, metadataFetch] = await Promise.all([locations, metadata]);
@@ -23,39 +35,47 @@ const MainScreen = () => {
     }
   }
 
-  //useEffect for start
-  useEffect(() => {
-    let mounted = true;
-    if (mounted) fetchData();
-    return () => mounted = false;
-  }, []);
-
-  //useEffect for updating data every X seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  //useEffect for updating markers when data changes
-  useEffect(() => {
-    mapMarkers();
-  }, [shipLocations])
-
-  const mapMarkers = () => {
-    if (shipLocations && shipMetadata) {
+  const getMarkers = () => {
+    if (shipLocations && shipMetadata && userLocations) {
       console.log("Updating markers...")
       const currentTime = Date.now()
-      const filterTime = currentTime - 36000
-      const combinedResult = shipLocations.filter(result => result.properties.timestampExternal >= filterTime).map(locaObj => ({
+      const filterTime = currentTime - 60000
+      const combinedResult = shipLocations.filter(i => i.properties.timestampExternal >= filterTime).map(locaObj => ({
         ...shipMetadata.find((metaObj) => (metaObj.mmsi === locaObj.mmsi)),
         ...locaObj
       }));
 
-      setMarkers(combinedResult);
+      setShipMarkers(combinedResult);
+      setUserMarkers(userLocations);
     }
   }
+
+  const updateUserLocationToFirebase = () => {
+    const currentLocationMOCK = {
+      coords: {
+        latitude: 60.244961,
+        longitude: 24.989050,
+        heading: 0,
+        speed: 30
+      }
+    }
+    fb.database().ref(`/userLocations/${fb.auth().currentUser.uid}`).set(currentLocationMOCK)
+  }
+
+  //UseEffects
+  useEffect(() => {
+    fetchData();
+    console.log("eka?")
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    updateUserLocationToFirebase();
+    getMarkers();
+  }, [shipLocations, shipMetadata, userLocations]);
 
   return (
     <Container>
@@ -71,16 +91,7 @@ const MainScreen = () => {
         customMapStyle={mapStyleDark}
         showsUserLocation={true}
         showsMyLocationButton={true}>
-        {markers.map((res, i) => {
-          let vesselIcon;
-          if (70 <= res.shipType < 90) {
-            vesselIcon = require("../../assets/cargoshipicon.png");
-          } else if (60 <= res.shipType < 70) {
-            vesselIcon = require("../../assets/cruiseicon.png");
-          } else {
-            vesselIcon = require("../../assets/boaticon.png");
-          }
-
+        {shipMarkers.map((res, i) => {
           return (
             <Marker
               key={i}
@@ -90,7 +101,19 @@ const MainScreen = () => {
               }}
               title={res.mmsi.toString()}
               description={res.shipType.toString()}
-              image={vesselIcon} />
+              image={require('../../assets/cargoshipicon.png')} />
+          );
+        })}
+        {userMarkers.map((res, i) => {
+          return (
+            <Marker
+              key={i}
+              coordinate={{
+                latitude: res.coords.latitude,
+                longitude: res.coords.longitude,
+              }}
+              title={"user"}
+              image={require('../../assets/usericon.png')} />
           );
         })}
       </MapView>

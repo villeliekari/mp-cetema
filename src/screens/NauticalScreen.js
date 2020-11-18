@@ -1,10 +1,40 @@
-import React from 'react';
-import { Container, Text } from 'native-base';
+import React, { useEffect, useState } from 'react';
+import { Body, Card, CardItem, Container, Content, Text } from 'native-base';
 
-const NauticalScreen = () => {
+const NauticalScreen = (props) => {
+  const [nauticalWarnings, setNauticalWarnings] = useState([]);
+
+  const fetchData = () => {
+    fetch('https://meri.digitraffic.fi/api/v1/nautical-warnings/published')
+      .then((response) => response.json())
+      .then(data => setNauticalWarnings(data.features))
+  }
+
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      fetchData();
+    }
+    return () => mounted = false;
+  }, [])
+
   return (
     <Container>
-      <Text>Nautical screen</Text>
+      <Content>
+        <Body>
+          {nauticalWarnings.map((warning, i) => {
+            return (
+              <Card key={i}>
+                <CardItem>
+                  <Text onPress={() => props.navigation.navigate('Nautical Warning', { warning })}>
+                    {warning.properties.areasEn}, {warning.properties.locationEn}: {warning.properties.contentsEn}
+                  </Text>
+                </CardItem>
+              </Card>
+            );
+          })}
+        </Body>
+      </Content>
     </Container>
   );
 }

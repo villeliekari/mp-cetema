@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Container, Form, Input, Item, Label, Text } from 'native-base';
+import { Body, Button, Container, Form, Input, Item, Label, Text } from 'native-base';
 import { Alert } from 'react-native';
 import fb from '../helpers/Firebase';
 
@@ -50,41 +50,9 @@ const AuthScreen = () => {
 
   return (
     <Container>
-      {!hasAccount ? (
-        <Form>
-          <Item stackedLabel>
-            <Label>Email</Label>
-            <Input
-              autoCapitalize="none"
-              value={email}
-              onChangeText={val => setEmail(val)}
-            />
-          </Item>
-          <Item stackedLabel>
-            <Label>Password</Label>
-            <Input
-              value={password}
-              onChangeText={val => setPassword(val)}
-              secureTextEntry
-            />
-          </Item>
-          <Button style={{ alignSelf: "center", margin: 10 }} onPress={() => userLogin()}>
-            <Text>Login</Text>
-          </Button>
-
-          <Button transparent onPress={() => switchForm(!hasAccount)}>
-            <Text>Don't have account? Click here to SignUp</Text>
-          </Button>
-        </Form>
-      ) : (
+      <Body>
+        {!hasAccount ? (
           <Form>
-            <Item stackedLabel>
-              <Label>Name</Label>
-              <Input
-                value={name}
-                onChangeText={val => setName(val)}
-              />
-            </Item>
             <Item stackedLabel>
               <Label>Email</Label>
               <Input
@@ -101,23 +69,57 @@ const AuthScreen = () => {
                 secureTextEntry
               />
             </Item>
-            <Item stackedLabel>
-              <Label>Confirm Password</Label>
-              <Input
-                value={confirmPassword}
-                onChangeText={val => setConfirmPassword(val)}
-                secureTextEntry
-              />
-            </Item>
-            <Button style={{ alignSelf: "center", margin: 10 }} onPress={() => userRegister()}>
-              <Text>Register</Text>
+            <Button style={{ alignSelf: "center", margin: 10 }} onPress={() => userLogin()}>
+              <Text>Login</Text>
             </Button>
 
             <Button transparent onPress={() => switchForm(!hasAccount)}>
-              <Text>Have account already? Click here to SignIn</Text>
+              <Text>Don't have account? Click here to SignUp</Text>
             </Button>
           </Form>
-        )}
+        ) : (
+            <Form>
+              <Item stackedLabel>
+                <Label>Name</Label>
+                <Input
+                  value={name}
+                  onChangeText={val => setName(val)}
+                />
+              </Item>
+              <Item stackedLabel>
+                <Label>Email</Label>
+                <Input
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={val => setEmail(val)}
+                />
+              </Item>
+              <Item stackedLabel>
+                <Label>Password</Label>
+                <Input
+                  value={password}
+                  onChangeText={val => setPassword(val)}
+                  secureTextEntry
+                />
+              </Item>
+              <Item stackedLabel>
+                <Label>Confirm Password</Label>
+                <Input
+                  value={confirmPassword}
+                  onChangeText={val => setConfirmPassword(val)}
+                  secureTextEntry
+                />
+              </Item>
+              <Button style={{ alignSelf: "center", margin: 10 }} onPress={() => userRegister()}>
+                <Text>Register</Text>
+              </Button>
+
+              <Button transparent onPress={() => switchForm(!hasAccount)}>
+                <Text>Have account already? Click here to SignIn</Text>
+              </Button>
+            </Form>
+          )}
+      </Body>
     </Container>
   );
 }
