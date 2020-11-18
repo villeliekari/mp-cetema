@@ -1,11 +1,18 @@
 import React from 'react';
-import { Button, Text, View } from 'react-native';
+import { Button, Container, Text } from 'native-base';
+import fb from '../helpers/Firebase';
 
 const SettingsScreen = () => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Settings  screen</Text>
-    </View>
+    <Container>
+      <Text>Settings screen</Text>
+      <Text>Firebase uid: {fb.auth().currentUser.uid}</Text>
+      <Text>Firebase displayName: {fb.auth().currentUser.displayName}</Text>
+      <Text>Firebase email: {fb.auth().currentUser.email}</Text>
+      <Button onPress={() => fb.auth().signOut()}>
+        <Text>Logout</Text>
+      </Button>
+    </Container>
   );
 }
 
