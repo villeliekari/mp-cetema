@@ -4,11 +4,12 @@
 
 ## :hammer: WIP
 
-### Build with
+### Made with
 
 - Expo
 - React Native
 - Native Base
+- Firebase
 
 ### Installation
 
@@ -19,6 +20,6 @@ yarn install
 yarn start
 ```
 
-## :warning: Expo build might not work.
+### :warning: Expo build might not work.
 
 [expo.io/@villeliekari/projects/mp-cetema](https://expo.io/@villeliekari/projects/mp-cetema)

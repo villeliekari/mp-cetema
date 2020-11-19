@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import Navigation from "./src/helpers/Navigator";
 
 const App = () => {
-  LogBox.ignoreLogs(["Setting a timer", "expected version range: 7.9.0"]);
+  LogBox.ignoreLogs(["Setting a timer"]);
   const [fontReady, setFontReady] = useState(false);
   const loadFonts = async () => {
     await Font.loadAsync({
