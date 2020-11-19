@@ -1,6 +1,6 @@
-import React from 'react';
-import { Body, Button, Container, Content, Text } from 'native-base';
-import fb from '../helpers/Firebase';
+import React from "react";
+import { Body, Button, Container, Content, Text } from "native-base";
+import fb from "../helpers/Firebase";
 
 const SettingsScreen = () => {
   return (
@@ -18,6 +18,6 @@ const SettingsScreen = () => {
       </Content>
     </Container>
   );
-}
+};
 
 export default SettingsScreen;
