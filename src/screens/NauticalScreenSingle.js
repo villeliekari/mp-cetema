@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Body, Card, CardItem, Container, Content, Text } from 'native-base';
+import React, { useEffect, useState } from "react";
+import { Body, Card, CardItem, Container, Content, Text } from "native-base";
 
 const NauticalScreenSingle = (props) => {
   const [nauticalWarning, setNauticalWarning] = useState({});
 
   useEffect(() => {
     setNauticalWarning(props.route.params.warning.properties);
-  }, [])
+  }, []);
 
   return (
     <Container>
@@ -15,7 +15,8 @@ const NauticalScreenSingle = (props) => {
           <Card>
             <CardItem>
               <Text>
-                {nauticalWarning.areasEn}, {nauticalWarning.locationEn}: {nauticalWarning.contentsEn}
+                {nauticalWarning.areasEn}, {nauticalWarning.locationEn}:{" "}
+                {nauticalWarning.contentsEn}
               </Text>
             </CardItem>
           </Card>
@@ -23,6 +24,6 @@ const NauticalScreenSingle = (props) => {
       </Content>
     </Container>
   );
-}
+};
 
 export default NauticalScreenSingle;
