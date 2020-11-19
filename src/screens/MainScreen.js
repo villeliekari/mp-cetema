@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Container } from "native-base";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { mapStyleDark } from "../styles/MapStyleDark";
+import * as Location from "expo-location";
 
 import fb from "../helpers/Firebase";
 
 const MainScreen = () => {
+  const [location, setLocation] = useState(null);
   const [shipLocations, setShipLocations] = useState(null);
   const [shipMetadata, setShipMetadata] = useState(null);
   const [userLocations, setUserLocations] = useState(null);
@@ -64,24 +66,37 @@ const MainScreen = () => {
   };
 
   const updateUserLocationToFirebase = () => {
-    const currentLocationMOCK = {
-      coords: {
-        latitude: 60.244961,
-        longitude: 24.98905,
-        heading: 0,
-        speed: 30,
-      },
-    };
-    fb.database()
-      .ref(`/userLocations/${fb.auth().currentUser.uid}`)
-      .set(currentLocationMOCK);
+    if (location) {
+      const currentLocation = {
+        ...location,
+        uid: fb.auth().currentUser.uid,
+        username: fb.auth().currentUser.displayName,
+        //boatname and so on.
+      };
+      fb.database()
+        .ref(`/userLocations/${fb.auth().currentUser.uid}`)
+        .set(currentLocation);
+    }
+  };
+
+  const getUserLocation = async () => {
+    console.log("Getting user location...");
+    let { status } = await Location.requestPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied");
+    }
+
+    let _location = await Location.getCurrentPositionAsync({});
+    setLocation(_location);
   };
 
   //UseEffects
   useEffect(() => {
     fetchData();
+    getUserLocation();
     const interval = setInterval(() => {
       fetchData();
+      getUserLocation();
     }, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -103,10 +118,14 @@ const MainScreen = () => {
         }}
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapStyleDark}
-        showsUserLocation={true}
         showsMyLocationButton={true}
       >
         {shipMarkers.map((res, i) => {
+          const currentTime = Date.now();
+          const vesselIcon =
+            res.shipType > 60
+              ? require("../../assets/cargoshipicon.png")
+              : require("../../assets/boaticon.png");
           return (
             <Marker
               key={i}
@@ -115,12 +134,18 @@ const MainScreen = () => {
                 longitude: res.geometry.coordinates[0],
               }}
               title={res.mmsi.toString()}
-              description={res.shipType.toString()}
-              image={require("../../assets/cargoshipicon.png")}
+              description={`${
+                (currentTime - res.properties.timestampExternal) / 1000
+              }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
+              image={vesselIcon}
             />
           );
         })}
         {userMarkers.map((res, i) => {
+          const userIcon =
+            res.uid === fb.auth().currentUser.uid
+              ? require("../../assets/selficon.png")
+              : require("../../assets/usericon.png");
           return (
             <Marker
               key={i}
@@ -128,8 +153,9 @@ const MainScreen = () => {
                 latitude: res.coords.latitude,
                 longitude: res.coords.longitude,
               }}
-              title={"user"}
-              image={require("../../assets/usericon.png")}
+              title={res.uid}
+              description={`username: ${res.username}`}
+              image={userIcon}
             />
           );
         })}
