@@ -16,7 +16,6 @@ const MainScreen = () => {
   const [userLocations, setUserLocations] = useState(null);
   const [shipMarkers, setShipMarkers] = useState([]);
   const [userMarkers, setUserMarkers] = useState([]);
-  const [userSosData, setUserSosData] = useState([]);
   const [active, setActive] = useState(false)
 
   const fetchData = async () => {
@@ -30,11 +29,11 @@ const MainScreen = () => {
     ).then(success);
 
     firebase.firestore().collection('userLocations').get().then(snap => {
-      let userLocationsData = [];
-      snap.forEach((childSnap) => {
-        userLocationsData.push(childSnap.data());
+      let array = [];
+      snap.forEach(doc => {
+        array.push(doc.data());
       });
-      setUserLocations(userLocationsData);
+      setUserLocations(array);
     });
 
     try {
@@ -109,19 +108,17 @@ const MainScreen = () => {
     );
   };
 
-  const receiveSosAlert = () => {
-    if (userSosData) {
-      console.log("xxxxxxxx", userSosData)
+  const receiveSosAlert = (data) => {
+      console.log("xxxxxxxx", data)
       Alert.alert(
         'SOS Alert',
-        userSosData.username + ' needs your help',
+        data[0].username + ' needs your help',
         [
           { text: 'Ok' },
           { text: 'Cancel', style: 'cancel' }
         ],
         { cancelable: true }
       )
-    }
   }
 
   const updateSosAlert = (option) => {
@@ -130,16 +127,18 @@ const MainScreen = () => {
         .collection('sos')
         .doc(firebase.auth().currentUser.uid)
         .update({
-          cancelled: true,
           rescued: true,
         })
     } else if (option == 'cancel') {
       firebase.firestore()
         .collection('sos')
         .doc(firebase.auth().currentUser.uid)
-        .update({
-          cancelled: true,
-        })
+        .delete()
+        .then(doc => {
+          console.log("Document successfully deleted!");
+      }).catch(function(error) {
+          console.error("Error removing document: ", error);
+      })
     }
     console.log('SOS alert updated:', option)
   }
@@ -158,7 +157,6 @@ const MainScreen = () => {
         g: geodata,
         uid: firebase.auth().currentUser.uid,
         username: firebase.auth().currentUser.displayName,
-        cancelled: false,
         rescued: false,
       };
       firebase.firestore()
@@ -181,18 +179,15 @@ const MainScreen = () => {
       const GeoFirestore = geofirestore.initializeApp(firebase.firestore())
       const geocollection = GeoFirestore.collection('sos')
       const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 5 })
-      query.where('cancelled', '==', false).onSnapshot(snap => {
-        if (snap.docs.exist) {
-          let userSosData = []
-          let changes = snap.docChanges();
-          for (let change of changes) {
-            userSosData.push(change.doc.data())
+      query.where('rescued', '==', false).onSnapshot(snap => {
+          let array = []
+          snap.forEach(doc => {
+            if (doc.exists && doc.id != firebase.auth().currentUser.uid) {
+            array.push(doc.data())
+          }})
+          if (array.length) {
+          receiveSosAlert(array)
           }
-          setUserSosData(userSosData)
-          receiveSosAlert()
-        } else {
-          console.log("SOS oma uid")
-        }
       })
     }
   }
