@@ -23,6 +23,7 @@
     "firebase": "^8.0.2",
     "geofirestore": "^4.3.0",
     "geokit": "^1.1.0",
+    "haversine": "^1.1.1",
     "mocha": "^8.2.1",
     "native-base": "^2.13.14",
     "react": "16.13.1",

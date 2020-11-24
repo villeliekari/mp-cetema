@@ -6,17 +6,22 @@ import { mapStyleDark } from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
+import { withinRadius } from '../helpers/Utility'
 
 import firebase from "../helpers/Firebase";
+
 
 const MainScreen = () => {
   const [location, setLocation] = useState(null);
   const [shipLocations, setShipLocations] = useState(null);
   const [shipMetadata, setShipMetadata] = useState(null);
-  const [userLocations, setUserLocations] = useState(null);
+  //const [userLocations, setUserLocations] = useState(null);
   const [shipMarkers, setShipMarkers] = useState([]);
   const [userMarkers, setUserMarkers] = useState([]);
+  const [locationState, setLocationState] = useState(false);
   const [active, setActive] = useState(false)
+
+  const GeoFirestore = geofirestore.initializeApp(firebase.firestore())
 
   const fetchData = async () => {
     console.log("Fetching data...");
@@ -27,14 +32,6 @@ const MainScreen = () => {
     const metadata = fetch(
       "https://meri.digitraffic.fi/api/v1/metadata/vessels"
     ).then(success);
-
-    firebase.firestore().collection('userLocations').get().then(snap => {
-      let array = [];
-      snap.forEach(doc => {
-        array.push(doc.data());
-      });
-      setUserLocations(array);
-    });
 
     try {
       const [locationsFetch, metadataFetch] = await Promise.all([
@@ -48,11 +45,48 @@ const MainScreen = () => {
     }
   };
 
-  const getMarkers = () => {
-    if (shipLocations && shipMetadata && userLocations) {
-      console.log("Updating markers...");
-      const currentTime = Date.now();
-      const filterTime = currentTime - 60000;
+  const getUserMarkers = () => {
+    if (location) {
+      console.log("Updating user markers...");
+
+      // get user locations in 100km radius and last 1 hour
+      // .where can't be used on query because inequality isn't supported
+      const filterTime = Date.now() - 3600000;
+      const geocollection = GeoFirestore.collection('userLocations')
+      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100 })
+      query.onSnapshot(snap => {
+        let array = [];
+        snap.forEach(doc => {
+          if (doc.exists && doc.data().timestamp >= filterTime) {
+            array.push(doc.data())
+
+            // measure distance between 2 geopoints using haversine formula
+            // radius in km
+            const myLocation = { latitude: location.coords.latitude, longitude: location.coords.longitude }
+            const otherLocation = { latitude: doc.data().g.geopoint.latitude, longitude: doc.data().g.geopoint.longitude }
+            const radius = 0.1
+
+            if (doc.id != firebase.auth().currentUser.uid && withinRadius(myLocation, otherLocation, radius)) {
+              Alert.alert(
+                'ALERT!',
+                'You are about to hit someone!',
+                [
+                  { text: 'yes' },
+                ],
+                { cancelable: true }
+              )
+            }
+          }
+        })
+        setUserMarkers(array)
+      })
+    }
+  }
+
+  const getShipMarkers = () => {
+    if (shipLocations && shipMetadata) {
+      console.log("Updating ship markers...");
+      const filterTime = Date.now() - 60000;
       const combinedResult = shipLocations
         .filter((i) => i.properties.timestampExternal >= filterTime)
         .map((locaObj) => ({
@@ -61,28 +95,39 @@ const MainScreen = () => {
         }));
 
       setShipMarkers(combinedResult);
-      setUserMarkers(userLocations);
     }
   };
 
-  const updateUserLocation = () => {
-    if (location) {
-      const currentLocation = {
-        ...location,
-        uid: firebase.auth().currentUser.uid,
-        username: firebase.auth().currentUser.displayName,
-        //boatname and so on.
-      };
-      firebase.firestore()
-        .collection('userLocations')
-        .doc(firebase.auth().currentUser.uid)
-        .set(currentLocation, { merge: true })
-        .then((doc) => {
-          console.log('New Location document added');
-        }).catch((error) => {
-          console.error('Error adding document: ', error);
-        });
+  const updateUserLocation = (location) => {
+    const coords = {
+      lat: location.coords.latitude,
+      lng: location.coords.longitude
     }
+    const geodata = {
+      geohash: geokit.hash(coords),
+      geopoint: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude)
+    }
+    const locationData = {
+      g: geodata,
+      heading: location.coords.heading,
+      speed: location.coords.speed,
+      accuracy: location.coords.accuracy,
+      timestamp: location.timestamp,
+      uid: firebase.auth().currentUser.uid,
+      username: firebase.auth().currentUser.displayName,
+      //boatname and so on.
+    };
+    firebase.firestore()
+      .collection('userLocations')
+      .doc(firebase.auth().currentUser.uid)
+      .set(locationData, { merge: true })
+      .then((doc) => {
+        console.log('New Location document added');
+      }).catch((error) => {
+        console.error('Error adding document: ', error);
+      });
+
+    setLocationState(true)
   }
 
   const getUserLocation = async () => {
@@ -92,8 +137,19 @@ const MainScreen = () => {
       setErrorMsg("Permission to access location was denied");
     }
 
-    let _location = await Location.getCurrentPositionAsync({});
-    setLocation(_location);
+    //update if location changes by 10m
+    await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.BestForNavigation,
+        distanceInterval: 10,
+        timeInterval: 10000
+      },
+      (_location) => {
+        // correct data structure could be set here
+        setLocation(_location)
+        updateUserLocation(_location)
+      }
+    );
   };
 
   const sosAlert = () => {
@@ -109,16 +165,16 @@ const MainScreen = () => {
   };
 
   const receiveSosAlert = (data) => {
-      console.log("xxxxxxxx", data)
-      Alert.alert(
-        'SOS Alert',
-        data[0].username + ' needs your help',
-        [
-          { text: 'Ok' },
-          { text: 'Cancel', style: 'cancel' }
-        ],
-        { cancelable: true }
-      )
+    console.log("xxxxxxxx", data)
+    Alert.alert(
+      'SOS Alert',
+      data[0].username + ' needs your help',
+      [
+        { text: 'Ok' },
+        { text: 'Cancel', style: 'cancel' }
+      ],
+      { cancelable: true }
+    )
   }
 
   const updateSosAlert = (option) => {
@@ -136,9 +192,9 @@ const MainScreen = () => {
         .delete()
         .then(doc => {
           console.log("Document successfully deleted!");
-      }).catch(function(error) {
+        }).catch(function (error) {
           console.error("Error removing document: ", error);
-      })
+        })
     }
     console.log('SOS alert updated:', option)
   }
@@ -147,7 +203,7 @@ const MainScreen = () => {
     if (location) {
       const coords = {
         lat: location.coords.latitude,
-        lng: location.coords.longitude,
+        lng: location.coords.longitude
       }
       const geodata = {
         geohash: geokit.hash(coords),
@@ -176,18 +232,18 @@ const MainScreen = () => {
 
   const getSosAlert = () => {
     if (location) {
-      const GeoFirestore = geofirestore.initializeApp(firebase.firestore())
       const geocollection = GeoFirestore.collection('sos')
-      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 5 })
+      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 1 })
       query.where('rescued', '==', false).onSnapshot(snap => {
-          let array = []
-          snap.forEach(doc => {
-            if (doc.exists && doc.id != firebase.auth().currentUser.uid) {
+        let array = []
+        snap.forEach(doc => {
+          if (doc.exists && doc.id != firebase.auth().currentUser.uid) {
             array.push(doc.data())
-          }})
-          if (array.length) {
-          receiveSosAlert(array)
           }
+        })
+        if (array.length) {
+          receiveSosAlert(array)
+        }
       })
     }
   }
@@ -196,18 +252,20 @@ const MainScreen = () => {
   useEffect(() => {
     fetchData();
     getUserLocation();
-    getSosAlert();
     const interval = setInterval(() => {
       fetchData();
-      getUserLocation();
     }, 120000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    updateUserLocation();
-    getMarkers();
-  }, [shipLocations, shipMetadata, userLocations]);
+    getSosAlert();
+    getUserMarkers();
+  }, [locationState]);
+
+  useEffect(() => {
+    getShipMarkers();
+  }, [shipLocations, shipMetadata]);
 
   return (
     <Container>
@@ -222,7 +280,6 @@ const MainScreen = () => {
           }}
           provider={PROVIDER_GOOGLE}
           customMapStyle={mapStyleDark}
-          showsUserLocation={true}
         >
           {shipMarkers.map((res, i) => {
             const currentTime = Date.now();
@@ -253,8 +310,8 @@ const MainScreen = () => {
               <Marker
                 key={i}
                 coordinate={{
-                  latitude: res.coords.latitude,
-                  longitude: res.coords.longitude,
+                  latitude: res.g.geopoint.latitude,
+                  longitude: res.g.geopoint.longitude,
                 }}
                 title={res.uid}
                 description={`username: ${res.username}`}
