@@ -2,10 +2,12 @@ import React, {useEffect, useState} from 'react';
 import {Container, Button, Icon, Fab} from 'native-base';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import {mapStyleDark} from '../styles/MapStyleDark';
+import {colors} from '../helpers/GlobalVariables';
+import Themes from '../styles/Themes';
 
 import fb from '../helpers/Firebase';
 
-const MainScreen = () => {
+const MainScreen = (props) => {
   const [shipLocations,
     setShipLocations] = useState(null);
   const [shipMetadata,
@@ -18,6 +20,10 @@ const MainScreen = () => {
     setUserMarkers] = useState([]);
   const [active,
     setActive] = useState(false);
+  const [mapStyle, setMapStyle] = useState(props);
+  //const [theme, setTheme]= useState(props);
+
+  //const setMapRef = ref => this.mapRef = ref;
 
   const fetchData = async() => {
     console.log("Fetching data...")
@@ -97,9 +103,19 @@ const MainScreen = () => {
     getMarkers();
   }, [shipLocations, shipMetadata, userLocations]);
 
+  /*const changeMap = () => {
+    console.log("update mapstyle1")
+      setMapStyle({ mapStyle: mapStyleDark }, () => {
+      console.log("update mapstyle2")
+      this.mapRef._updateStyle();      
+      console.log("update complete")
+    })
+  }*/
+
   return (
     <Container>
       <MapView
+        ref={(ref) => mapRef = ref}
         style={{
         flex: 1
       }}
@@ -150,8 +166,10 @@ const MainScreen = () => {
         onPress={() => setActive(!active)}>
         <Icon name="share"/>
         <Button style={{
-          backgroundColor: '#34A34F'
-        }}>
+          backgroundColor: '#34A34F'          
+        }}
+        //onPress={() => changeMap(props)}
+        >
           <Icon name="logo-whatsapp"/>
         </Button>
         <Button style={{
@@ -159,7 +177,7 @@ const MainScreen = () => {
         }}>
           <Icon name="logo-facebook"/>
         </Button>
-        <Button disabled style={{
+        <Button style={{
           backgroundColor: '#DD5144'
         }}>
           <Icon name="mail"/>
