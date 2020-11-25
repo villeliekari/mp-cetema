@@ -28,20 +28,21 @@ const AuthStackScreen = () => {
   );
 };
 
-const SplashStack = createStackNavigator();
+const MainStack = createStackNavigator();
 
-const SplashStackScreen = () => {
+const MainStackScreen = () => {
   return (
-    <SplashStack.Navigator
+    <MainStack.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: colors.dark.primary },
         headerTintColor: colors.dark.tint,
       }}
     >
-      <SplashStack.Screen name="Splash" component={SplashScreen} />
-    </SplashStack.Navigator>
+      <MainStack.Screen name="Map" component={MainScreen} />
+    </MainStack.Navigator>
   );
 };
+
 
 const InfoStack = createStackNavigator();
 
@@ -92,7 +93,7 @@ const TabNavigatorScreen = () => {
     >
       <Tab.Screen
         name="Map"
-        component={MainScreen}
+        component={MainStackScreen}
         options={{
           tabBarIcon: () => (
             <Icon name="md-boat" style={{ color: colors.dark.tint }} />
@@ -132,7 +133,7 @@ const Navigation = () => {
 
   return (
     <NavigationContainer>
-      { isLoading ? ( SplashStackScreen() ) : ( isSigned ? ( TabNavigatorScreen() ) : ( AuthStackScreen() ))}
+      { isLoading ? ( <SplashScreen /> ) : (isSigned ? (TabNavigatorScreen()) : (AuthStackScreen()))}
     </NavigationContainer>
   )
 

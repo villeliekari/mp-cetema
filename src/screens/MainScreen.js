@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Container, Fab, Button, View, Header, Icon } from "native-base";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { mapStyleDark } from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
 import { withinRadius } from '../helpers/Utility'
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
 
 import firebase from "../helpers/Firebase";
-
 
 const MainScreen = () => {
   const [location, setLocation] = useState(null);
   const [shipLocations, setShipLocations] = useState(null);
   const [shipMetadata, setShipMetadata] = useState(null);
-  //const [userLocations, setUserLocations] = useState(null);
   const [shipMarkers, setShipMarkers] = useState([]);
   const [userMarkers, setUserMarkers] = useState([]);
   const [locationState, setLocationState] = useState(false);
@@ -60,21 +60,22 @@ const MainScreen = () => {
           if (doc.exists && doc.data().timestamp >= filterTime) {
             array.push(doc.data())
 
-            // measure distance between 2 geopoints using haversine formula
-            // radius in km
-            const myLocation = { latitude: location.coords.latitude, longitude: location.coords.longitude }
-            const otherLocation = { latitude: doc.data().g.geopoint.latitude, longitude: doc.data().g.geopoint.longitude }
-            const radius = 0.1
+            if (doc.id != firebase.auth().currentUser.uid) {
+              // set collision alert if not same uid and set radius
+              // radius in km
+              const myLocation = { latitude: location.coords.latitude, longitude: location.coords.longitude }
+              const otherLocation = { latitude: doc.data().g.geopoint.latitude, longitude: doc.data().g.geopoint.longitude }
+              const radius = 0.1
 
-            if (doc.id != firebase.auth().currentUser.uid && withinRadius(myLocation, otherLocation, radius)) {
-              Alert.alert(
-                'ALERT!',
-                'You are about to hit someone!',
-                [
-                  { text: 'yes' },
-                ],
-                { cancelable: true }
-              )
+              if (withinRadius(myLocation, otherLocation, radius)) {
+                Notifications.scheduleNotificationAsync({
+                  content: {
+                    title: 'Collision Alert!',
+                    body: "You are too close to another vessel!",
+                  },
+                  trigger: null,
+                });
+              }
             }
           }
         })
@@ -137,12 +138,13 @@ const MainScreen = () => {
       setErrorMsg("Permission to access location was denied");
     }
 
-    //update if location changes by 10m
+    // should update if location changes by 20m and every 5s
+    // but doesn't distanceinterval overrites timeinterval, big suck
     await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.BestForNavigation,
         distanceInterval: 10,
-        timeInterval: 10000
+        timeInterval: 5000
       },
       (_location) => {
         // correct data structure could be set here
@@ -248,12 +250,11 @@ const MainScreen = () => {
     }
   }
 
-  //UseEffects
   useEffect(() => {
-    //fetchData();
+    fetchData();
     getUserLocation();
     const interval = setInterval(() => {
-      //fetchData();
+      fetchData();
     }, 120000);
     return () => clearInterval(interval);
   }, []);
@@ -279,6 +280,7 @@ const MainScreen = () => {
         }}
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapStyleDark}
+        showsUserLocation={true}
       >
         {shipMarkers.map((res, i) => {
           const currentTime = Date.now();
@@ -313,7 +315,9 @@ const MainScreen = () => {
                 longitude: res.g.geopoint.longitude,
               }}
               title={res.uid}
-              description={`username: ${res.username}`}
+              description={
+                `username: ${res.username}, time: ${(Date.now() - res.timestamp) / 1000}s ago`
+              }
               image={userIcon}
             />
           );
