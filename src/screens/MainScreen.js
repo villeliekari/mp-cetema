@@ -269,69 +269,65 @@ const MainScreen = () => {
 
   return (
     <Container>
-      <View style={{ flex: 1 }}>
-        <MapView
-          style={{ flex: 1 }}
-          initialRegion={{
-            latitude: 60.1587262,
-            longitude: 24.922834,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          }}
-          provider={PROVIDER_GOOGLE}
-          customMapStyle={mapStyleDark}
-        >
-          {shipMarkers.map((res, i) => {
-            const currentTime = Date.now();
-            const vesselIcon =
-              res.shipType > 60
-                ? require("../../assets/cargoshipicon.png")
-                : require("../../assets/boaticon.png");
-            return (
-              <Marker
-                key={i}
-                coordinate={{
-                  latitude: res.geometry.coordinates[1],
-                  longitude: res.geometry.coordinates[0],
-                }}
-                title={res.mmsi.toString()}
-                description={`${(currentTime - res.properties.timestampExternal) / 1000
-                  }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
-                image={vesselIcon}
-              />
-            );
-          })}
-          {userMarkers.map((res, i) => {
-            const userIcon =
-              res.uid === firebase.auth().currentUser.uid
-                ? require("../../assets/selficon.png")
-                : require("../../assets/usericon.png");
-            return (
-              <Marker
-                key={i}
-                coordinate={{
-                  latitude: res.g.geopoint.latitude,
-                  longitude: res.g.geopoint.longitude,
-                }}
-                title={res.uid}
-                description={`username: ${res.username}`}
-                image={userIcon}
-              />
-            );
-          })}
-        </MapView>
-        <View style={{ position: 'absolute', alignSelf: 'flex-end', top: '95%' }}>
-          <Fab
-            active={active}
-            direction="up"
-            containerStyle={{}}
-            style={{ backgroundColor: '#5067FF' }}
-            position="bottomRight"
-            onPress={() => sendSosAlert()}>
-            <Icon name="medkit" />
-          </Fab>
-        </View>
-      </View>
+      <MapView
+        style={{ flex: 1 }}
+        initialRegion={{
+          latitude: 60.1587262,
+          longitude: 24.922834,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        }}
+        provider={PROVIDER_GOOGLE}
+        customMapStyle={mapStyleDark}
+      >
+        {shipMarkers.map((res, i) => {
+          const currentTime = Date.now();
+          const vesselIcon =
+            res.shipType > 60
+              ? require("../../assets/cargoshipicon.png")
+              : require("../../assets/boaticon.png");
+          return (
+            <Marker
+              key={i}
+              coordinate={{
+                latitude: res.geometry.coordinates[1],
+                longitude: res.geometry.coordinates[0],
+              }}
+              title={res.mmsi.toString()}
+              description={`${(currentTime - res.properties.timestampExternal) / 1000
+                }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
+              image={vesselIcon}
+            />
+          );
+        })}
+        {userMarkers.map((res, i) => {
+          const userIcon =
+            res.uid === firebase.auth().currentUser.uid
+              ? require("../../assets/selficon.png")
+              : require("../../assets/usericon.png");
+          return (
+            <Marker
+              key={i}
+              coordinate={{
+                latitude: res.g.geopoint.latitude,
+                longitude: res.g.geopoint.longitude,
+              }}
+              title={res.uid}
+              description={`username: ${res.username}`}
+              image={userIcon}
+            />
+          );
+        })}
+      </MapView>
+      <Fab
+        active={active}
+        direction="up"
+        containerStyle={{}}
+        style={{ backgroundColor: '#5067FF' }}
+        position="bottomRight"
+        onPress={() => sendSosAlert()}>
+        <Icon name="medkit" />
+      </Fab>
     </Container>
   );
 };
