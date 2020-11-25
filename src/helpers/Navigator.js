@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "native-base";
 import fb from "./Firebase";
 import { colors } from "./GlobalVariables";
+import SplashScreen from "../screens/SplashScreen";
 import AuthScreen from "../screens/AuthScreen";
 import MainScreen from "../screens/MainScreen";
 import InfoScreen from "../screens/InfoScreen";
@@ -24,6 +25,21 @@ const AuthStackScreen = () => {
     >
       <AuthStack.Screen name="Boat Navigation" component={AuthScreen} />
     </AuthStack.Navigator>
+  );
+};
+
+const SplashStack = createStackNavigator();
+
+const SplashStackScreen = () => {
+  return (
+    <SplashStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.dark.primary },
+        headerTintColor: colors.dark.tint,
+      }}
+    >
+      <SplashStack.Screen name="Splash" component={SplashScreen} />
+    </SplashStack.Navigator>
   );
 };
 
@@ -107,14 +123,19 @@ const TabNavigatorScreen = () => {
 
 const Navigation = () => {
   const [isSigned, setSigned] = useState(false);
-  fb.auth().onAuthStateChanged((user) =>
+  const [isLoading, setIsLoading] = useState(true);
+
+  fb.auth().onAuthStateChanged((user) => {
     user ? setSigned(true) : setSigned(false)
-  );
+    setIsLoading(false)
+  });
+
   return (
     <NavigationContainer>
-      {isSigned ? TabNavigatorScreen() : AuthStackScreen()}
+      { isLoading ? ( SplashStackScreen() ) : ( isSigned ? ( TabNavigatorScreen() ) : ( AuthStackScreen() ))}
     </NavigationContainer>
-  );
-};
+  )
+
+}
 
 export default Navigation;

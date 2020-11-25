@@ -250,10 +250,10 @@ const MainScreen = () => {
 
   //UseEffects
   useEffect(() => {
-    fetchData();
+    //fetchData();
     getUserLocation();
     const interval = setInterval(() => {
-      fetchData();
+      //fetchData();
     }, 120000);
     return () => clearInterval(interval);
   }, []);
