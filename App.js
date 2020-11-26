@@ -4,9 +4,19 @@ import * as Expo from "expo";
 import * as Font from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import Navigation from "./src/helpers/Navigator";
+import * as Notifications from 'expo-notifications';
 
 const App = () => {
   LogBox.ignoreLogs(["Setting a timer"]);
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });  
+
   const [fontReady, setFontReady] = useState(false);
   const loadFonts = async () => {
     await Font.loadAsync({

@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "native-base";
 import fb from "./Firebase";
 import { colors } from "./GlobalVariables";
+import SplashScreen from "../screens/SplashScreen";
 import AuthScreen from "../screens/AuthScreen";
 import MainScreen from "../screens/MainScreen";
 import InfoScreen from "../screens/InfoScreen";
@@ -26,6 +27,22 @@ const AuthStackScreen = () => {
     </AuthStack.Navigator>
   );
 };
+
+const MainStack = createStackNavigator();
+
+const MainStackScreen = () => {
+  return (
+    <MainStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.dark.primary },
+        headerTintColor: colors.dark.tint,
+      }}
+    >
+      <MainStack.Screen name="Map" component={MainScreen} />
+    </MainStack.Navigator>
+  );
+};
+
 
 const InfoStack = createStackNavigator();
 
@@ -76,7 +93,7 @@ const TabNavigatorScreen = () => {
     >
       <Tab.Screen
         name="Map"
-        component={MainScreen}
+        component={MainStackScreen}
         options={{
           tabBarIcon: () => (
             <Icon name="md-boat" style={{ color: colors.dark.tint }} />
@@ -107,14 +124,19 @@ const TabNavigatorScreen = () => {
 
 const Navigation = () => {
   const [isSigned, setSigned] = useState(false);
-  fb.auth().onAuthStateChanged((user) =>
+  const [isLoading, setIsLoading] = useState(true);
+
+  fb.auth().onAuthStateChanged((user) => {
     user ? setSigned(true) : setSigned(false)
-  );
+    setIsLoading(false)
+  });
+
   return (
     <NavigationContainer>
-      {isSigned ? TabNavigatorScreen() : AuthStackScreen()}
+      { isLoading ? ( <SplashScreen /> ) : (isSigned ? (TabNavigatorScreen()) : (AuthStackScreen()))}
     </NavigationContainer>
-  );
-};
+  )
+
+}
 
 export default Navigation;
