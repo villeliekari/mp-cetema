@@ -17,7 +17,7 @@ const App = () => {
       shouldPlaySound: false,
       shouldSetBadge: false,
     }),
-  });  
+  });
 
   const [fontReady, setFontReady] = useState(false);
   const loadFonts = async () => {
