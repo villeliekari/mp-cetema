@@ -33,10 +33,7 @@ const MainStack = createStackNavigator();
 const MainStackScreen = () => {
   return (
     <MainStack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.dark.primary },
-        headerTintColor: colors.dark.tint,
-      }}
+    screenOptions={{headerShown: false}}
     >
       <MainStack.Screen name="Map" component={MainScreen} />
     </MainStack.Navigator>
