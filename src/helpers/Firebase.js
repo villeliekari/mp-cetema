@@ -1,4 +1,4 @@
-import * as fb from 'firebase';
+import * as fb from "firebase";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCEcNmUPjxmjapyufPOWFkc7z66xn8QVh0",
@@ -7,7 +7,7 @@ const firebaseConfig = {
   projectId: "cetema-project",
   storageBucket: "cetema-project.appspot.com",
   messagingSenderId: "128337473069",
-  appId: "1:128337473069:web:1c8f234597490237f052a4"
+  appId: "1:128337473069:web:1c8f234597490237f052a4",
 };
 
 fb.initializeApp(firebaseConfig);

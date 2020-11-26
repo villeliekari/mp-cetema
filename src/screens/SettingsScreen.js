@@ -1,33 +1,47 @@
-import React from 'react';
-import { Body, Button, Container, Content, Text } from 'native-base';
-import fb from '../helpers/Firebase';
-import useTheme from 'react-native-paper';
+import React from "react";
+import {Body, Button, Container, Content, Text} from "native-base";
+import fb from "../helpers/Firebase";
+import {useTheme} from '../helpers/ThemeContext';
+import {DarkModeToggle} from '../helpers/Switch';
 
 const SettingsScreen = () => {
 
-  const paperTheme = useTheme();
-  const {toggleTheme}= React.useContext;
-  
+  const {colors, isDark} = useTheme();
+
+  const containerStyle = {
+    backgroundColor: colors.background
+  };
+
+  const textStyle = {
+    color: colors.text
+  }
 
   return (
-    <Container>
+    <Container style={containerStyle}>
       <Content>
         <Body>
-          <Text>Settings screen</Text>
-          <Text>Firebase uid: {fb.auth().currentUser.uid}</Text>
-          <Text>Firebase displayName: {fb.auth().currentUser.displayName}</Text>
-          <Text>Firebase email: {fb.auth().currentUser.email}</Text>
+          <Text style={textStyle}>Settings screen</Text>
+          <Text style={textStyle}>Firebase uid: {fb
+              .auth()
+              .currentUser
+              .uid}</Text>
+          <Text style={textStyle}>Firebase displayName: {fb
+              .auth()
+              .currentUser
+              .displayName}</Text>
+          <Text style={textStyle}>Firebase email: {fb
+              .auth()
+              .currentUser
+              .email}</Text>
           <Button onPress={() => fb.auth().signOut()}>
             <Text>Logout</Text>
           </Button>
-          <Button onPress={() => toggleTheme()} 
-            value={paperTheme.dark}>
-              Toggle darkmode
-          </Button>
+          <Text style={textStyle}>Toggle Darkmode</Text>
+          <DarkModeToggle></DarkModeToggle>
         </Body>
       </Content>
     </Container>
   );
-}
+};
 
 export default SettingsScreen;
