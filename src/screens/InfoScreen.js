@@ -81,17 +81,17 @@ const InfoScreen = (props) => {
               );
             }
           })}
-          <Button
+          <Button block light
             onPress={() => props.navigation.navigate("Nautical Warnings")}
           >
             <Text>Show all Nautical Warnings</Text>
           </Button>
           <Card>
-            <CardItem header>
-              <Text onPress={() => props.navigation.navigate("Forecast")}
+            <CardItem header button onPress={() => props.navigation.navigate("Forecast")}>
+              <Text
                 style={{fontWeight: "bold"}}>Sea state at your location: </Text>
             </CardItem>
-            <CardItem>
+            <CardItem button onPress={() => props.navigation.navigate("Forecast")}>
               <Image source={{uri: 'https://developer.foreca.com/static/images/symbols_pastel/' + (weatherObs.symbol) + '.png'}} style={{
                 flex: 1,
                 aspectRatio: 4,

@@ -29,7 +29,7 @@ const Forecast = (props) => {
           .then((responseJson) => {
             setSeaObs(responseJson.forecast);
           })
-          fetch("https://pfa.foreca.com/api/v1/forecast/hourly/:location?location= 24.940266, 60.148091&token=" + token)
+        fetch("https://pfa.foreca.com/api/v1/forecast/hourly/:location?location= 24.940266, 60.148091&token=" + token)
           .then((response) => response.json())
           .then((responseJson) => {
             setWeatherObs(responseJson.forecast);
@@ -50,10 +50,10 @@ const Forecast = (props) => {
 
   return (
     <Container>
-      <Content  ref={c => (this.component = c)}>
+      <Content ref={c => (this.component = c)}>
         <Body>
           <Card>
-          <H1>Marine forecast at your location</H1>
+            <H1>Marine forecast at your location</H1>
           </Card>
           {seaObs.map((item, i) => {
             return (
@@ -73,10 +73,10 @@ const Forecast = (props) => {
               </Card>
             );
           })}
-          <Button block light 
-          onPress={() => this.component._root.scrollToPosition(0, 0)}>
-        <Text>Back to top</Text>
-      </Button>
+          <Button block light
+            onPress={() => this.component._root.scrollToPosition(0, 0)}>
+            <Text>Back to top</Text>
+          </Button>
         </Body>
       </Content>
     </Container>
