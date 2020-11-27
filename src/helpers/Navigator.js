@@ -12,6 +12,7 @@ import InfoScreen from "../screens/InfoScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import NauticalScreen from "../screens/NauticalScreen";
 import NauticalDetails from "../screens/NauticalScreenSingle";
+import Forecast from "../screens/Forecast";
 
 const AuthStack = createStackNavigator();
 
@@ -55,6 +56,7 @@ const InfoStackScreen = () => {
       <InfoStack.Screen name="Weather" component={InfoScreen} />
       <InfoStack.Screen name="Nautical Warnings" component={NauticalScreen} />
       <InfoStack.Screen name="Nautical Warning" component={NauticalDetails} />
+      <InfoStack.Screen name="Forecast" component={Forecast} />
     </InfoStack.Navigator>
   );
 };
