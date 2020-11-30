@@ -281,6 +281,8 @@ const MainScreen = () => {
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapStyleDark}
         showsUserLocation={true}
+        followsUserLocation={true}
+        showsMyLocationButton={true}
       >
         {shipMarkers.map((res, i) => {
           const currentTime = Date.now();

@@ -8,7 +8,8 @@ import {
   Container,
   Content,
   Text,
-  H1
+  H1,
+  H3
 } from "native-base";
 import weatherApi from "../helpers/WeatherApi";
 import * as Location from "expo-location";
@@ -47,7 +48,7 @@ const Forecast = () => {
               .then((responseJson) => {
                 setSeaObs(responseJson.forecast);
               })
-            fetch('https://pfa.foreca.com/api/v1/forecast/hourly/:location?location= 24.940266, 60.148091&token=' + token)
+            fetch('https://pfa.foreca.com/api/v1/forecast/hourly/:location?location=' + (_location.coords.longitude) + ', ' + (_location.coords.latitude) + '&token=' + token)
               .then((response) => response.json())
               .then((responseJson) => {
                 setWeatherObs(responseJson.forecast);
@@ -72,7 +73,8 @@ const Forecast = () => {
             return (
               <Card key={i}>
                 <CardItem>
-                  <Text>{item.time ? `Time: ${item.time}` : "Can't fetch time"}</Text>
+                <H3>{item.time ? `${item.time.substring(0, 10)}` : "Can't fetch time"}</H3>
+                  <H3>{item.time ? ` ${item.time.substring(11, 16)}` : "Can't fetch time"}</H3>
                 </CardItem>
                 <CardItem>
                   <Text>{item.seaTemp ? `Seawater temperature: ${item.seaTemp}°C` : "Can't fetch temp"}</Text>
