@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Container, Fab, Button, View, Header, Icon } from "native-base";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert, StyleSheet } from 'react-native';
-import { mapStyleDark } from "../styles/MapStyleDark";
+import React, {useEffect, useState} from "react";
+import {Container, Fab, Button, View, Header, Icon} from "native-base";
+import MapView, {Marker, PROVIDER_GOOGLE} from "react-native-maps";
+import {Alert, StyleSheet} from 'react-native';
+import {mapStyleDark} from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
-import { withinRadius } from '../helpers/Utility'
+import {withinRadius} from '../helpers/Utility'
 import * as Notifications from 'expo-notifications';
 import * as Permissions from 'expo-permissions';
 
@@ -53,7 +53,7 @@ const MainScreen = () => {
       // .where can't be used on query because inequality isn't supported
       const filterTime = Date.now() - 3600000;
       const geocollection = GeoFirestore.collection('userLocations')
-      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100 })
+      const query = geocollection.near({center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100})
       query.onSnapshot(snap => {
         let array = [];
         snap.forEach(doc => {
@@ -63,8 +63,8 @@ const MainScreen = () => {
             if (doc.id != firebase.auth().currentUser.uid) {
               // set collision alert if not same uid and set radius
               // radius in km
-              const myLocation = { latitude: location.coords.latitude, longitude: location.coords.longitude }
-              const otherLocation = { latitude: doc.data().g.geopoint.latitude, longitude: doc.data().g.geopoint.longitude }
+              const myLocation = {latitude: location.coords.latitude, longitude: location.coords.longitude}
+              const otherLocation = {latitude: doc.data().g.geopoint.latitude, longitude: doc.data().g.geopoint.longitude}
               const radius = 0.1
 
               if (withinRadius(myLocation, otherLocation, radius)) {
@@ -121,7 +121,7 @@ const MainScreen = () => {
     firebase.firestore()
       .collection('userLocations')
       .doc(firebase.auth().currentUser.uid)
-      .set(locationData, { merge: true })
+      .set(locationData, {merge: true})
       .then((doc) => {
         console.log('New Location document added');
       }).catch((error) => {
@@ -133,7 +133,7 @@ const MainScreen = () => {
 
   const getUserLocation = async () => {
     console.log("Getting user location...");
-    let { status } = await Location.requestPermissionsAsync();
+    let {status} = await Location.requestPermissionsAsync();
     if (status !== "granted") {
       setErrorMsg("Permission to access location was denied");
     }
@@ -159,10 +159,10 @@ const MainScreen = () => {
       'SOS Alert',
       'People nearby will receive your alert',
       [
-        { text: 'Rescued', onPress: () => updateSosAlert('rescued') },
-        { text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel' }
+        {text: 'Rescued', onPress: () => updateSosAlert('rescued')},
+        {text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel'}
       ],
-      { cancelable: false }
+      {cancelable: false}
     );
   };
 
@@ -172,10 +172,10 @@ const MainScreen = () => {
       'SOS Alert',
       data[0].username + ' needs your help',
       [
-        { text: 'Ok' },
-        { text: 'Cancel', style: 'cancel' }
+        {text: 'Ok'},
+        {text: 'Cancel', style: 'cancel'}
       ],
-      { cancelable: true }
+      {cancelable: true}
     )
   }
 
@@ -220,7 +220,7 @@ const MainScreen = () => {
       firebase.firestore()
         .collection('sos')
         .doc(firebase.auth().currentUser.uid)
-        .set(sosData, { merge: true })
+        .set(sosData, {merge: true})
         .then((doc) => {
           console.log('New SOS document added')
         }).catch((error) => {
@@ -235,7 +235,7 @@ const MainScreen = () => {
   const getSosAlert = () => {
     if (location) {
       const geocollection = GeoFirestore.collection('sos')
-      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 1 })
+      const query = geocollection.near({center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 1})
       query.where('rescued', '==', false).onSnapshot(snap => {
         let array = []
         snap.forEach(doc => {
@@ -271,7 +271,7 @@ const MainScreen = () => {
   return (
     <Container>
       <MapView
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         initialRegion={{
           latitude: 60.1587262,
           longitude: 24.922834,
@@ -327,7 +327,7 @@ const MainScreen = () => {
         active={active}
         direction="up"
         containerStyle={{}}
-        style={{ backgroundColor: '#5067FF' }}
+        style={{backgroundColor: '#5067FF'}}
         position="bottomRight"
         onPress={() => sendSosAlert()}>
         <Icon name="medkit" />

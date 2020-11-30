@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import {Alert} from 'react-native';
 import {
   Body,
   Button,
@@ -10,42 +11,54 @@ import {
   H1
 } from "native-base";
 import weatherApi from "../helpers/WeatherApi";
+import * as Location from "expo-location";
 
-const Forecast = (props) => {
+const Forecast = () => {
   const [seaObs, setSeaObs] = useState([]);
   const [weatherObs, setWeatherObs] = useState([]);
 
-  const fetchToken = () => {
-    fetch('https://pfa.foreca.com/authorize/token?user=' + (weatherApi.user) + '&password=' + (weatherApi.password), {
-      method: 'POST'
-    })
-      .then((response) => response.json())
-      //If response is in json then in success
-      .then((responseJson) => {
-        //Success
-        token = responseJson.access_token;
-        fetch("https://pfa.foreca.com/api/v1/marine/forecast/hourly/:location?location= 24.940266, 60.148091&token=" + token)
+  const getLocAndFetch = async () => {
+    console.log("Forecast user location..");
+    let {status} = await Location.requestPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied");
+    }
+
+    // should update if location changes by 20m and every 5s
+    // but doesn't distanceinterval overrites timeinterval, big suck
+    await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.BestForNavigation,
+        distanceInterval: 10,
+        timeInterval: 5000
+      },
+      (_location) => {
+        // correct data structure could be set here
+        fetch('https://pfa.foreca.com/authorize/token?user=' + (weatherApi.user) + '&password=' + (weatherApi.password), {
+          method: 'POST'
+        })
           .then((response) => response.json())
+          //If response is in json then in success
           .then((responseJson) => {
-            setSeaObs(responseJson.forecast);
-          })
-        fetch("https://pfa.foreca.com/api/v1/forecast/hourly/:location?location= 24.940266, 60.148091&token=" + token)
-          .then((response) => response.json())
-          .then((responseJson) => {
-            setWeatherObs(responseJson.forecast);
-          })
-      });
-  }
-
-
-
+            //Success
+            token = responseJson.access_token;
+            fetch('https://pfa.foreca.com/api/v1/marine/forecast/hourly/:location?location=' + (_location.coords.longitude) + ', ' + (_location.coords.latitude) + '&token=' + token)
+              .then((response) => response.json())
+              .then((responseJson) => {
+                setSeaObs(responseJson.forecast);
+              })
+            fetch('https://pfa.foreca.com/api/v1/forecast/hourly/:location?location= 24.940266, 60.148091&token=' + token)
+              .then((response) => response.json())
+              .then((responseJson) => {
+                setWeatherObs(responseJson.forecast);
+              })
+          });
+      }
+    );
+  };
 
   useEffect(() => {
-    let mounted = true;
-    if (mounted) {
-      fetchToken();
-    }
-    return () => (mounted = false);
+    getLocAndFetch();
   }, []);
 
   return (
