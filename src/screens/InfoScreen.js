@@ -11,11 +11,22 @@ import {
 } from "native-base";
 import * as Location from "expo-location";
 import weatherApi from "../helpers/WeatherApi";
+import {useTheme} from '../helpers/ThemeContext';
 
 const InfoScreen = (props) => {
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
   const [seaObs, setSeaObs] = useState([]);
   const [weatherObs, setWeatherObs] = useState({});
+
+  const {colors, isDark} = useTheme();
+
+  const containerStyle = {
+    backgroundColor: colors.background
+  };
+
+  const textStyle = {
+    color: colors.text
+  }
 
   const fetchData = () => {
     fetch("https://meri.digitraffic.fi/api/v1/nautical-warnings/published")
@@ -72,15 +83,15 @@ const InfoScreen = (props) => {
   }, []);
 
   return (
-    <Container>
+    <Container style={containerStyle}>
       <Content>
         <Body>
           {nauticalWarnings.map((warning, i) => {
             if (i < 1) {
               return (
-                <Card key={i}>
-                  <CardItem>
-                    <Text
+                <Card key={i} >
+                  <CardItem style={containerStyle}>
+                    <Text style={textStyle}
                       onPress={() =>
                         props.navigation.navigate("Nautical Warning", {
                           warning,

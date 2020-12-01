@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from "react";
 import {Container, Fab, Button, View, Header, Icon} from "native-base";
-import MapView, {Marker, PROVIDER_GOOGLE} from "react-native-maps";
-import {Alert, StyleSheet} from 'react-native';
-import {mapStyleDark} from "../styles/MapStyleDark";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Alert, StyleSheet } from 'react-native';
+import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
 import {withinRadius} from '../helpers/Utility'
 import * as Notifications from 'expo-notifications';
 import * as Permissions from 'expo-permissions';
+import {useTheme} from '../helpers/ThemeContext';
 
 import firebase from "../helpers/Firebase";
 
@@ -20,6 +21,17 @@ const MainScreen = () => {
   const [userMarkers, setUserMarkers] = useState([]);
   const [locationState, setLocationState] = useState(false);
   const [active, setActive] = useState(false)
+
+  
+  const {colors, isDark} = useTheme();
+
+  const containerStyle = {
+    backgroundColor: colors.background
+  };
+
+  const textStyle = {
+    color: colors.text
+  }
 
   const GeoFirestore = geofirestore.initializeApp(firebase.firestore())
 
@@ -269,7 +281,7 @@ const MainScreen = () => {
   }, [shipLocations, shipMetadata]);
 
   return (
-    <Container>
+    <Container style={containerStyle}>
       <MapView
         style={{flex: 1}}
         initialRegion={{
@@ -279,7 +291,7 @@ const MainScreen = () => {
           longitudeDelta: 0.1,
         }}
         provider={PROVIDER_GOOGLE}
-        customMapStyle={mapStyleDark}
+        customMapStyle={isDark? mapStyleDark : mapStyleLight}
         showsUserLocation={true}
         followsUserLocation={true}
         showsMyLocationButton={true}

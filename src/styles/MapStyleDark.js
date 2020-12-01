@@ -229,3 +229,21 @@ export const mapStyleDark = [
     ],
   },
 ];
+
+
+export const mapStyleLight = [
+  [
+    {
+        "featureType": "administrative.country",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "visibility": "simplified"
+            },
+            {
+                "hue": "#ff0000"
+            }
+        ]
+    }
+]
+];

@@ -13,8 +13,10 @@ import SettingsScreen from "../screens/SettingsScreen";
 import NauticalScreen from "../screens/NauticalScreen";
 import NauticalDetails from "../screens/NauticalScreenSingle";
 import Forecast from "../screens/Forecast";
+import {useTheme} from '../helpers/ThemeContext';
 
 const AuthStack = createStackNavigator();
+
 
 const AuthStackScreen = () => {
   return (
@@ -137,5 +139,7 @@ const Navigation = () => {
   )
 
 }
+// darkmode switch for map isDarkModeEnabled ? mapStyles.darkMode :
+// mapStyles.lightMode
 
 export default Navigation;
