@@ -33,7 +33,8 @@ const SettingsScreen = () => {
               .auth()
               .currentUser
               .email}</Text>
-          <Button onPress={() => fb.auth().signOut()}>
+          <Button onPress={() => fb.auth().signOut()}
+          backgroundColor={colors.primary}>
             <Text>Logout</Text>
           </Button>
           <Text style={textStyle}>Toggle Darkmode</Text>
