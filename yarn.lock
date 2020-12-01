@@ -6167,6 +6167,14 @@ react-native-screens@~2.10.1:
   resolved "https://registry.yarnpkg.com/react-native-screens/-/react-native-screens-2.10.1.tgz#06d22fae87ef0ce51c616c34a199726db1403b95"
   integrity sha512-Z2kKSk4AwWRQNCBmTjViuBQK0/Lx0jc25TZptn/2gKYUCOuVRvCekoA26u0Tsb3BIQ8tWDsZW14OwDlFUXW1aw==
 
+react-native-speedometer-chart@^0.7.5:
+  version "0.7.5"
+  resolved "https://registry.yarnpkg.com/react-native-speedometer-chart/-/react-native-speedometer-chart-0.7.5.tgz#0dcb0f996a1e262231a957bb75fb4435c33cffe4"
+  integrity sha512-50hjoeQb6CK1ehyAGWCGD5zLvCHY1SpyGcUrfyxI8npcKB/dA6B/LDtdRgVx1E/tuk3hsgx09aIEgSSyE6jjUg==
+  dependencies:
+    color "^3.1.2"
+    prop-types "^15.7.2"
+
 react-native-vector-icons@^7.0.0:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/react-native-vector-icons/-/react-native-vector-icons-7.1.0.tgz#145487d617b2a81d395d2cf64e6e065fcab3a454"
