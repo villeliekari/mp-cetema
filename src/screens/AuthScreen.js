@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Body,
   Button,
@@ -10,7 +10,8 @@ import {
   Text,
 } from "native-base";
 import { Alert } from "react-native";
-import fb from "../helpers/Firebase";
+import firebase from "../helpers/Firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AuthScreen = () => {
   const [name, setName] = useState(null);
@@ -19,11 +20,29 @@ const AuthScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState(null);
   const [hasAccount, switchForm] = useState(false);
 
+  const getLastLoginEmail = async () => {
+    try {
+      const email = await AsyncStorage.getItem("@loginEmail");
+      if (email !== null) setEmail(email);
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
+
+  const setLastLoginEmail = async () => {
+    try {
+      await AsyncStorage.setItem("@loginEmail", email);
+    } catch (err) {
+      console.log(e.message);
+    }
+  };
+
   const userLogin = () => {
     if (email && password) {
-      fb.auth()
+      firebase
+        .auth()
         .signInWithEmailAndPassword(email, password)
-        .then()
+        .then(setLastLoginEmail)
         .catch((err) => {
           switch (err.code) {
             case "auth/wrong-password":
@@ -42,12 +61,14 @@ const AuthScreen = () => {
   const userRegister = () => {
     if (name && email && password && confirmPassword) {
       if (password === confirmPassword) {
-        fb.auth()
+        firebase
+          .auth()
           .createUserWithEmailAndPassword(email, password)
           .then((res) => {
             res.user.updateProfile({
               displayName: name,
             });
+            setLastLoginEmail;
           })
           .catch((err) => {
             switch (err.code) {
@@ -66,6 +87,10 @@ const AuthScreen = () => {
       } else Alert.alert("Passwords do not match");
     } else Alert.alert("Fill every field");
   };
+
+  useEffect(() => {
+    getLastLoginEmail();
+  }, []);
 
   return (
     <Container>
