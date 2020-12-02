@@ -117,7 +117,7 @@ const MainScreen = () => {
     }
   };
 
-  const updateUserLocation = (location) => {
+  const updateUserLocation = async (location) => {
     const coords = {
       lat: location.coords.latitude,
       lng: location.coords.longitude
@@ -136,16 +136,32 @@ const MainScreen = () => {
       username: firebase.auth().currentUser.displayName,
       //boatname and so on.
     };
-    firebase.firestore()
-      .collection('userLocations')
-      .doc(firebase.auth().currentUser.uid)
-      .set(locationData, {merge: true})
-      .then((doc) => {
-        console.log('New Location document added');
-      }).catch((error) => {
-        console.error('Error adding document: ', error);
-      });
+    
+    try {
+      await firebase
+        .firestore()
+        .collection("userBoats")
+        .doc(firebase.auth().currentUser.uid)
+        .get()
+        .then((res) => {
+          locationData.boatName = res.data().boatName;
+          locationData.boatType = res.data().boatType;
+        })
+        .catch((err) => {
+          throw new Error(err.message);
+        });
 
+      await firebase
+        .firestore()
+        .collection("userLocations")
+        .doc(firebase.auth().currentUser.uid)
+        .set(locationData, { merge: true })
+        .catch((error) => {
+          throw new Error("Error adding document: ", error);
+        });
+    } catch (err) {
+      Alert.alert(err);
+    }
     setLocationState(true)
   }
 
@@ -335,7 +351,7 @@ const MainScreen = () => {
           longitudeDelta: 0.1,
         }}
         provider={PROVIDER_GOOGLE}
-        customMapStyle={isDark? mapStyleDark : mapStyleLight}
+        customMapStyle={isDark ? mapStyleDark : mapStyleLight}
         showsUserLocation={true}
         followsUserLocation={true}
         showsMyLocationButton={true}
@@ -355,30 +371,29 @@ const MainScreen = () => {
               }}
               title={res.mmsi.toString()}
               description={`${(currentTime - res.properties.timestampExternal) / 1000
-                }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
+              }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
               image={vesselIcon}
             />
           );
         })}
         {userMarkers.map((res, i) => {
-          const userIcon =
-            res.uid === firebase.auth().currentUser.uid
-              ? require("../../assets/selficon.png")
-              : require("../../assets/usericon.png");
-          return (
-            <Marker
-              key={i}
-              coordinate={{
-                latitude: res.g.geopoint.latitude,
-                longitude: res.g.geopoint.longitude,
-              }}
-              title={res.uid}
-              description={
-                `username: ${res.username}, time: ${(Date.now() - res.timestamp) / 1000}s ago`
-              }
-              image={userIcon}
-            />
-          );
+          //Get only other users markers and use one in mapview for self (showsUserLocation={true})
+          if (firebase.auth().currentUser.uid !== res.uid) {
+            return (
+              <Marker
+                key={i}
+                coordinate={{
+                  latitude: res.g.geopoint.latitude,
+                  longitude: res.g.geopoint.longitude,
+                }}
+                title={res.username}
+                description={`type: ${res.boatType}, name: ${
+                  res.boatName
+                }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
+                image={require("../../assets/usericon.png")}
+              />
+            );
+          }
         })}
         {rescueMarkers.map((res, i) => {
           return (
@@ -390,7 +405,8 @@ const MainScreen = () => {
               }}
               title={"SOS"}
               description={`username: ${res.username}, phone`}
-            />)
+            />
+          );
         })}
       </MapView>
       <Fab

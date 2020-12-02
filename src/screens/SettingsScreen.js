@@ -54,7 +54,7 @@ const SettingsScreen = (props) => {
     <Container style={containerStyle}>
       <Content>
         <Card>
-          <CardItem header>
+          <CardItem header bordered>
             <Text>User infromation WIP</Text>
           </CardItem>
           <CardItem>
@@ -89,12 +89,14 @@ const SettingsScreen = (props) => {
           </CardItem>
         </Card>
         <Card>
-          <CardItem header>
+          <CardItem header bordered>
             <Text>App settings</Text>
           </CardItem>
           <CardItem>
-            <Text style={textStyle}>Toggle Darkmode</Text>
-            <DarkModeToggle />
+            <Body>
+              <Text>Toggle Darkmode</Text>
+              <DarkModeToggle />
+            </Body>
           </CardItem>
         </Card>
       </Content>
