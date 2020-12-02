@@ -7,12 +7,8 @@ import Navigation from "./src/helpers/Navigator";
 import * as Notifications from 'expo-notifications';
 import {AppearanceProvider} from 'react-native-appearance';
 import {ThemeProvider} from './src/helpers/ThemeContext';
-import {useTheme} from './src/helpers/ThemeContext';
 
 const App = () => {
-
-  const {colors, isDark} = useTheme();
-
   LogBox.ignoreLogs(["Setting a timer"]);
 
   Notifications.setNotificationHandler({
@@ -38,15 +34,12 @@ const App = () => {
   if (!fontReady) {
     return <Expo.AppLoading />;
   }
-//Status barstyle not working due to use of (headers) NativeBase
+
   return (
     <>
     <AppearanceProvider>
       <ThemeProvider>
-        <StatusBar 
-        backgroundColor={colors.background}
-        barStyle={isDark?"light-content":'dark-content'}
-        />
+        <StatusBar style="light" />
         <Navigation  />
       </ThemeProvider>      
     </AppearanceProvider>
@@ -54,6 +47,5 @@ const App = () => {
     </>
   );
 };
-//style={isDark? "light" : "dark"}
 
 export default App;
