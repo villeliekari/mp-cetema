@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Body,
   Button,
@@ -10,7 +10,8 @@ import {
   Text,
 } from "native-base";
 import { Alert } from "react-native";
-import fb from "../helpers/Firebase";
+import firebase from "../helpers/Firebase";
+import asyncStorage from "../helpers/AsyncStorage";
 
 const AuthScreen = () => {
   const [name, setName] = useState(null);
@@ -21,9 +22,10 @@ const AuthScreen = () => {
 
   const userLogin = () => {
     if (email && password) {
-      fb.auth()
+      firebase
+        .auth()
         .signInWithEmailAndPassword(email, password)
-        .then()
+        .then(asyncStorage.set("@loginEmail", email))
         .catch((err) => {
           switch (err.code) {
             case "auth/wrong-password":
@@ -42,12 +44,14 @@ const AuthScreen = () => {
   const userRegister = () => {
     if (name && email && password && confirmPassword) {
       if (password === confirmPassword) {
-        fb.auth()
+        firebase
+          .auth()
           .createUserWithEmailAndPassword(email, password)
           .then((res) => {
             res.user.updateProfile({
               displayName: name,
             });
+            setLastLoginEmail;
           })
           .catch((err) => {
             switch (err.code) {
@@ -66,6 +70,14 @@ const AuthScreen = () => {
       } else Alert.alert("Passwords do not match");
     } else Alert.alert("Fill every field");
   };
+
+  useEffect(() => {
+    const getSavedEmail = async () => {
+      const savedEmail = await asyncStorage.get("@loginEmail");
+      if (savedEmail) setEmail(savedEmail);
+    };
+    getSavedEmail();
+  }, []);
 
   return (
     <Container>

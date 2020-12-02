@@ -5,6 +5,8 @@ import * as Font from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import Navigation from "./src/helpers/Navigator";
 import * as Notifications from 'expo-notifications';
+import {AppearanceProvider} from 'react-native-appearance';
+import {ThemeProvider} from './src/helpers/ThemeContext';
 
 const App = () => {
   LogBox.ignoreLogs(["Setting a timer"]);
@@ -15,7 +17,7 @@ const App = () => {
       shouldPlaySound: false,
       shouldSetBadge: false,
     }),
-  });  
+  });
 
   const [fontReady, setFontReady] = useState(false);
   const loadFonts = async () => {
@@ -35,8 +37,13 @@ const App = () => {
 
   return (
     <>
-      <StatusBar style="light" />
-      <Navigation />
+    <AppearanceProvider>
+      <ThemeProvider>
+        <StatusBar style="light" />
+        <Navigation  />
+      </ThemeProvider>      
+    </AppearanceProvider>
+      
     </>
   );
 };
