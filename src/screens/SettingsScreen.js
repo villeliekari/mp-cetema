@@ -90,7 +90,7 @@ const SettingsScreen = (props) => {
           </CardItem>
         </Card>
         <Text style={textStyle}>Toggle Darkmode</Text>
-        <DarkModeToggle/>
+        <DarkModeToggle></DarkModeToggle>
       </Content>
     </Container>
   );
