@@ -34,7 +34,6 @@ const SettingsScreen = (props) => {
     setEmail(firebase.auth().currentUser.email);
 
     const getBoatInfo = async () => {
-      console.log("update boat info");
       await firebase
         .firestore()
         .collection("userBoats")
@@ -89,8 +88,15 @@ const SettingsScreen = (props) => {
             </Button>
           </CardItem>
         </Card>
-        <Text style={textStyle}>Toggle Darkmode</Text>
-        <DarkModeToggle></DarkModeToggle>
+        <Card>
+          <CardItem header>
+            <Text>App settings</Text>
+          </CardItem>
+          <CardItem>
+            <Text style={textStyle}>Toggle Darkmode</Text>
+            <DarkModeToggle />
+          </CardItem>
+        </Card>
       </Content>
     </Container>
   );
