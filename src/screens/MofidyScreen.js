@@ -3,6 +3,7 @@ import {
   Body,
   Button,
   Card,
+  CardItem,
   Container,
   Content,
   Form,
@@ -166,6 +167,9 @@ const ModifyScreen = (props) => {
     <Container style={containerStyle}>
       <Content>
         <Card>
+          <CardItem header>
+            <Text>Change user infromation</Text>
+          </CardItem>
           <Form>
             <Item stackedLabel>
               <Label>Name</Label>
@@ -197,6 +201,9 @@ const ModifyScreen = (props) => {
         </Card>
 
         <Card>
+          <CardItem header>
+            <Text>Change Password</Text>
+          </CardItem>
           <Form>
             <Item stackedLabel>
               <Label>Current Password</Label>
@@ -232,6 +239,9 @@ const ModifyScreen = (props) => {
         </Card>
 
         <Card>
+          <CardItem header>
+            <Text>Change boat infromation</Text>
+          </CardItem>
           <Form>
             <Item stackedLabel>
               <Label>Boat name</Label>
