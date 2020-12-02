@@ -5,12 +5,16 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "native-base";
 import fb from "./Firebase";
 import { colors } from "./GlobalVariables";
+import SplashScreen from "../screens/SplashScreen";
 import AuthScreen from "../screens/AuthScreen";
 import MainScreen from "../screens/MainScreen";
 import InfoScreen from "../screens/InfoScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import ModifyScreen from "../screens/MofidyScreen";
 import NauticalScreen from "../screens/NauticalScreen";
 import NauticalDetails from "../screens/NauticalScreenSingle";
+import Forecast from "../screens/Forecast";
+import { useTheme } from "../helpers/ThemeContext";
 
 const AuthStack = createStackNavigator();
 
@@ -24,6 +28,16 @@ const AuthStackScreen = () => {
     >
       <AuthStack.Screen name="Boat Navigation" component={AuthScreen} />
     </AuthStack.Navigator>
+  );
+};
+
+const MainStack = createStackNavigator();
+
+const MainStackScreen = () => {
+  return (
+    <MainStack.Navigator screenOptions={{ headerShown: false }}>
+      <MainStack.Screen name="Map" component={MainScreen} />
+    </MainStack.Navigator>
   );
 };
 
@@ -41,6 +55,7 @@ const InfoStackScreen = () => {
       <InfoStack.Screen name="Weather" component={InfoScreen} />
       <InfoStack.Screen name="Nautical Warnings" component={NauticalScreen} />
       <InfoStack.Screen name="Nautical Warning" component={NauticalDetails} />
+      <InfoStack.Screen name="Forecast" component={Forecast} />
     </InfoStack.Navigator>
   );
 };
@@ -56,7 +71,7 @@ const SettingsStackScreen = () => {
       }}
     >
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
-      <SettingsStack.Screen name="Theme" component={SettingsScreen} />
+      <SettingsStack.Screen name="Modify" component={ModifyScreen} />
       <SettingsStack.Screen name="About" component={SettingsScreen} />
     </SettingsStack.Navigator>
   );
@@ -76,7 +91,7 @@ const TabNavigatorScreen = () => {
     >
       <Tab.Screen
         name="Map"
-        component={MainScreen}
+        component={MainStackScreen}
         options={{
           tabBarIcon: () => (
             <Icon name="md-boat" style={{ color: colors.dark.tint }} />
@@ -107,12 +122,22 @@ const TabNavigatorScreen = () => {
 
 const Navigation = () => {
   const [isSigned, setSigned] = useState(false);
-  fb.auth().onAuthStateChanged((user) =>
-    user ? setSigned(true) : setSigned(false)
-  );
+  const [isLoading, setIsLoading] = useState(true);
+
+  fb.auth().onAuthStateChanged((user) => {
+    user ? setSigned(true) : setSigned(false);
+    setIsLoading(false);
+  });
+
   return (
     <NavigationContainer>
-      {isSigned ? TabNavigatorScreen() : AuthStackScreen()}
+      {isLoading ? (
+        <SplashScreen />
+      ) : isSigned ? (
+        TabNavigatorScreen()
+      ) : (
+        AuthStackScreen()
+      )}
     </NavigationContainer>
   );
 };

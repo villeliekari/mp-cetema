@@ -1,4 +1,5 @@
 node_modules/**/*
+helpers/WeatherApi.js
 .expo/*
 npm-debug.*
 *.jks
@@ -8,6 +9,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+debug.log
 
 # macOS
 .DS_Store
