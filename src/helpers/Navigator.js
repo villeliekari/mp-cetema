@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "native-base";
 import fb from "./Firebase";
-import { colors } from "./GlobalVariables";
 import SplashScreen from "../screens/SplashScreen";
 import AuthScreen from "../screens/AuthScreen";
 import MainScreen from "../screens/MainScreen";
@@ -16,22 +15,30 @@ import NauticalDetails from "../screens/NauticalScreenSingle";
 import Forecast from "../screens/Forecast";
 import { useTheme } from "../helpers/ThemeContext";
 
+const themeColors = () => {  
+    const {colors, isDark} = useTheme();
+return colors;
+}
+console.log(themeColors);
+
 const AuthStack = createStackNavigator();
+const MainStack = createStackNavigator();
+const InfoStack = createStackNavigator();
+const SettingsStack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
 const AuthStackScreen = () => {
   return (
     <AuthStack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: colors.dark.primary },
-        headerTintColor: colors.dark.tint,
-      }}
+        headerStyle: { backgroundColor: themeColors().primary },
+        headerTintColor: themeColors().tint,        
+      }}      
     >
       <AuthStack.Screen name="Boat Navigation" component={AuthScreen} />
     </AuthStack.Navigator>
   );
 };
-
-const MainStack = createStackNavigator();
 
 const MainStackScreen = () => {
   return (
@@ -41,14 +48,12 @@ const MainStackScreen = () => {
   );
 };
 
-const InfoStack = createStackNavigator();
-
 const InfoStackScreen = () => {
   return (
     <InfoStack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: colors.dark.primary },
-        headerTintColor: colors.dark.tint,
+        headerStyle: { backgroundColor: themeColors().primary },
+        headerTintColor: themeColors().tint,
       }}
     >
       <InfoStack.Screen name="Info" component={InfoScreen} />
@@ -60,14 +65,13 @@ const InfoStackScreen = () => {
   );
 };
 
-const SettingsStack = createStackNavigator();
 
 const SettingsStackScreen = () => {
   return (
     <SettingsStack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: colors.dark.primary },
-        headerTintColor: colors.dark.tint,
+        headerStyle: { backgroundColor: themeColors().primary },
+        headerTintColor: themeColors().tint,
       }}
     >
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
@@ -77,16 +81,15 @@ const SettingsStackScreen = () => {
   );
 };
 
-const Tab = createBottomTabNavigator();
 
 const TabNavigatorScreen = () => {
   return (
     <Tab.Navigator
       tabBarOptions={{
-        activeTintColor: colors.dark.accent,
-        activeBackgroundColor: colors.dark.secondary,
-        inactiveTintColor: colors.dark.tint,
-        inactiveBackgroundColor: colors.dark.primary,
+        activeTintColor: themeColors().accent,
+        activeBackgroundColor: themeColors().secondary,
+        inactiveTintColor: themeColors().tint,
+        inactiveBackgroundColor: themeColors().primary,
       }}
     >
       <Tab.Screen
@@ -94,7 +97,7 @@ const TabNavigatorScreen = () => {
         component={MainStackScreen}
         options={{
           tabBarIcon: () => (
-            <Icon name="md-boat" style={{ color: colors.dark.tint }} />
+            <Icon name="md-boat" style={{ color: themeColors().tint }} />
           ),
         }}
       />
@@ -103,7 +106,7 @@ const TabNavigatorScreen = () => {
         component={InfoStackScreen}
         options={{
           tabBarIcon: () => (
-            <Icon name="md-cloudy" style={{ color: colors.dark.tint }} />
+            <Icon name="md-cloudy" style={{ color: themeColors().tint }} />
           ),
         }}
       />
@@ -112,7 +115,7 @@ const TabNavigatorScreen = () => {
         component={SettingsStackScreen}
         options={{
           tabBarIcon: () => (
-            <Icon name="md-menu" style={{ color: colors.dark.tint }} />
+            <Icon name="md-menu" style={{ color: themeColors().tint }} />
           ),
         }}
       />
