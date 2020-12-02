@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Body,
   Button,
@@ -11,10 +11,14 @@ import {
 import firebase from "../helpers/Firebase";
 import { useTheme } from "../helpers/ThemeContext";
 import { DarkModeToggle } from "../helpers/Switch";
+import { useFocusEffect } from "@react-navigation/native";
 
 const SettingsScreen = (props) => {
   const [name, setName] = useState(null);
   const [email, setEmail] = useState(null);
+  const [boatName, setBoatName] = useState(null);
+  const [boatType, setBoatType] = useState(null);
+
   const { colors, isDark } = useTheme();
 
   const containerStyle = {
@@ -25,9 +29,26 @@ const SettingsScreen = (props) => {
     color: colors.text,
   };
 
-  useEffect(() => {
+  useFocusEffect(() => {
     setName(firebase.auth().currentUser.displayName);
     setEmail(firebase.auth().currentUser.email);
+
+    const getBoatInfo = async () => {
+      console.log("update boat info");
+      await firebase
+        .firestore()
+        .collection("userBoats")
+        .doc(firebase.auth().currentUser.uid)
+        .get()
+        .then((res) => {
+          setBoatName(res.data().boatName);
+          setBoatType(res.data().boatType);
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    };
+    getBoatInfo();
   }, []);
 
   return (
@@ -35,7 +56,7 @@ const SettingsScreen = (props) => {
       <Content>
         <Card>
           <CardItem header>
-            <Text>User infromation</Text>
+            <Text>User infromation WIP</Text>
           </CardItem>
           <CardItem>
             <Body>
@@ -43,6 +64,10 @@ const SettingsScreen = (props) => {
                 Name: {name}
                 {"\n"}
                 Email: {email}
+                {"\n"}
+                Boat name: {boatName}
+                {"\n"}
+                Boat type: {boatType}
                 {"\n"}
               </Text>
             </Body>
