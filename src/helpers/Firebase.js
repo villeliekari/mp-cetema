@@ -1,4 +1,4 @@
-import * as fb from "firebase";
+import * as firebase from "firebase";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCEcNmUPjxmjapyufPOWFkc7z66xn8QVh0",
@@ -10,6 +10,6 @@ const firebaseConfig = {
   appId: "1:128337473069:web:1c8f234597490237f052a4",
 };
 
-fb.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-export default fb;
+export default firebase;

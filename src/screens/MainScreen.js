@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Container, Fab, Button, View, Header, Icon } from "native-base";
+import { Container, Fab, Icon } from "native-base";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert, StyleSheet } from 'react-native';
+import { Alert } from 'react-native';
 import { mapStyleDark } from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
 import { withinRadius } from '../helpers/Utility'
 import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
 
 import firebase from "../helpers/Firebase";
 
@@ -18,8 +17,10 @@ const MainScreen = () => {
   const [shipMetadata, setShipMetadata] = useState(null);
   const [shipMarkers, setShipMarkers] = useState([]);
   const [userMarkers, setUserMarkers] = useState([]);
+  const [rescueMarkers, setRescueMarkers] = useState([]);
   const [locationState, setLocationState] = useState(false);
-  const [active, setActive] = useState(false)
+  const [active, setActive] = useState(false);
+  const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
 
   const GeoFirestore = geofirestore.initializeApp(firebase.firestore())
 
@@ -55,12 +56,12 @@ const MainScreen = () => {
       const geocollection = GeoFirestore.collection('userLocations')
       const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100 })
       query.onSnapshot(snap => {
-        let array = [];
+        let array = []
         snap.forEach(doc => {
           if (doc.exists && doc.data().timestamp >= filterTime) {
             array.push(doc.data())
 
-            if (doc.id != firebase.auth().currentUser.uid) {
+            /*if (doc.id != firebase.auth().currentUser.uid) {
               // set collision alert if not same uid and set radius
               // radius in km
               const myLocation = { latitude: location.coords.latitude, longitude: location.coords.longitude }
@@ -68,20 +69,24 @@ const MainScreen = () => {
               const radius = 0.1
 
               if (withinRadius(myLocation, otherLocation, radius)) {
-                Notifications.scheduleNotificationAsync({
-                  content: {
-                    title: 'Collision Alert!',
-                    body: "You are too close to another vessel!",
-                  },
-                  trigger: null,
-                });
+                sendCollisionAlert()
               }
-            }
+            }*/
           }
         })
         setUserMarkers(array)
       })
     }
+  }
+
+  const sendCollisionAlert = () => {
+    Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Collision Alert!',
+        body: "You are too close to another vessel!",
+      },
+      trigger: null,
+    });
   }
 
   const getShipMarkers = () => {
@@ -139,7 +144,7 @@ const MainScreen = () => {
     }
 
     // should update if location changes by 20m and every 5s
-    // but doesn't distanceinterval overrites timeinterval, big suck
+    // but doesn't work properly, because distanceinterval overrites timeinterval, big suck
     await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.BestForNavigation,
@@ -167,13 +172,23 @@ const MainScreen = () => {
   };
 
   const receiveSosAlert = (data) => {
-    console.log("xxxxxxxx", data)
     Alert.alert(
       'SOS Alert',
       data[0].username + ' needs your help',
       [
-        { text: 'Ok' },
-        { text: 'Cancel', style: 'cancel' }
+        {
+          text: 'Accept', onPress: () => {
+
+            // update firebase doc
+            firebase.firestore()
+              .collection('sos')
+              .doc(data[0].uid)
+              .update({
+                rescueAccepted: true,
+              })
+          }
+        },
+        { text: 'Cancel', onPress: () => setRescueMarkers([]), style: 'cancel' }
       ],
       { cancelable: true }
     )
@@ -187,16 +202,18 @@ const MainScreen = () => {
         .update({
           rescued: true,
         })
+      setIsSendingSosAlert(false)
     } else if (option == 'cancel') {
       firebase.firestore()
         .collection('sos')
         .doc(firebase.auth().currentUser.uid)
         .delete()
         .then(doc => {
-          console.log("Document successfully deleted!");
+          console.log("SOS Document successfully deleted!");
         }).catch(function (error) {
-          console.error("Error removing document: ", error);
+          console.error("Error removing SOS document: ", error);
         })
+      setIsSendingSosAlert(false)
     }
     console.log('SOS alert updated:', option)
   }
@@ -216,6 +233,7 @@ const MainScreen = () => {
         uid: firebase.auth().currentUser.uid,
         username: firebase.auth().currentUser.displayName,
         rescued: false,
+        rescueAccepted: false
       };
       firebase.firestore()
         .collection('sos')
@@ -224,9 +242,10 @@ const MainScreen = () => {
         .then((doc) => {
           console.log('New SOS document added')
         }).catch((error) => {
-          console.error('Error adding document: ', error)
+          console.error('Error adding SOS document: ', error)
         })
-      sosAlert();
+      sosAlert()
+      setIsSendingSosAlert(true)
     } else {
       Alert.alert("No location found");
     }
@@ -236,7 +255,7 @@ const MainScreen = () => {
     if (location) {
       const geocollection = GeoFirestore.collection('sos')
       const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 1 })
-      query.where('rescued', '==', false).onSnapshot(snap => {
+      query.where('rescued', '==', false).where('rescueAccepted', '==', false).onSnapshot(snap => {
         let array = []
         snap.forEach(doc => {
           if (doc.exists && doc.id != firebase.auth().currentUser.uid) {
@@ -245,8 +264,28 @@ const MainScreen = () => {
         })
         if (array.length) {
           receiveSosAlert(array)
+          setRescueMarkers(array)
         }
       })
+    }
+  }
+
+  const receiveUpdatesOnSosAlert = async () => {
+    if (isSendingSosAlert == true) {
+      await firebase.firestore()
+        .collection("sos")
+        .doc(firebase.auth().currentUser.uid)
+        .onSnapshot(snap => {
+          if (snap.exists && snap.data().rescueAccepted == true) {
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: 'SOS UPDATE!',
+                body: "Someone is on its way to help you!",
+              },
+              trigger: null,
+            })
+          }
+        })
     }
   }
 
@@ -258,6 +297,10 @@ const MainScreen = () => {
     }, 120000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    receiveUpdatesOnSosAlert();
+  }, [isSendingSosAlert]);
 
   useEffect(() => {
     getSosAlert();
@@ -321,6 +364,18 @@ const MainScreen = () => {
               image={userIcon}
             />
           );
+        })}
+        {rescueMarkers.map((res, i) => {
+          return (
+            <Marker
+              key={i}
+              coordinate={{
+                latitude: res.g.geopoint.latitude,
+                longitude: res.g.geopoint.longitude,
+              }}
+              title={"SOS"}
+              description={`username: ${res.username}, phone`}
+            />)
         })}
       </MapView>
       <Fab
