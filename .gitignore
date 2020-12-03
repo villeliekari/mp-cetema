@@ -1,5 +1,4 @@
 node_modules/**/*
-helpers/WeatherApi.js
 .expo/*
 npm-debug.*
 *.jks

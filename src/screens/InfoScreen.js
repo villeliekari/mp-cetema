@@ -7,10 +7,11 @@ import {
   CardItem,
   Container,
   Content,
-  Text
+  Text,
+  H3
 } from "native-base";
 import * as Location from "expo-location";
-import weatherApi from "../helpers/WeatherApi";
+import {weatherApi} from "../helpers/WeatherApi";
 
 const InfoScreen = (props) => {
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
@@ -80,17 +81,19 @@ const InfoScreen = (props) => {
               return (
                 <Card key={i}>
                   <CardItem>
-                    <Text
+                    <H3
                       onPress={() =>
                         props.navigation.navigate("Nautical Warning", {
                           warning,
-                        })
-                      }
-                    >
-                      {warning.properties.areasEn},{" "}
-                      {warning.properties.locationEn}:{" "}
-                      {warning.properties.contentsEn}
-                    </Text>
+                        })}>{warning.properties.areasEn}
+                    </H3>
+                  </CardItem>
+                  <CardItem><Text onPress={() =>
+                    props.navigation.navigate("Nautical Warning", {
+                      warning,
+                    })}>
+                    {warning.properties.locationEn}:{" "}
+                    {warning.properties.contentsEn}</Text>
                   </CardItem>
                 </Card>
               );

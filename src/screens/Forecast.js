@@ -11,7 +11,7 @@ import {
   H1,
   H3
 } from "native-base";
-import weatherApi from "../helpers/WeatherApi";
+import {weatherApi} from "../helpers/WeatherApi";
 import * as Location from "expo-location";
 
 const Forecast = () => {
@@ -64,6 +64,8 @@ const Forecast = () => {
 
   return (
     <Container>
+      {seaObs ?
+        <>
       <Content ref={c => (this.component = c)}>
         <Body>
           <Card>
@@ -94,6 +96,7 @@ const Forecast = () => {
           </Button>
         </Body>
       </Content>
+      </> : <Text>Loading</Text>}
     </Container>
   );
 };
