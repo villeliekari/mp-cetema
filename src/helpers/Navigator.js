@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useContext } from "react";
-import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
+import React, { useState, useMemo, useEffect } from "react";
+import { NavigationContainer, useTheme } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "native-base";
@@ -14,40 +14,38 @@ import NauticalScreen from "../screens/NauticalScreen";
 import NauticalDetails from "../screens/NauticalScreenSingle";
 import Forecast from "../screens/Forecast";
 
-import { StatusBar } from "expo-status-bar";
-import { Provider as PaperProvider, useTheme } from 'react-native-paper';
 import ThemeContext from './ThemeContext';
 import { CustomDarkTheme, CustomDefaultTheme } from '../styles/Themes';
 
-const themeColors = () => {  
-  const { isDarkTheme, toggleTheme } = useContext(ThemeContext)
-  return toggleTheme
-}
 
 const AuthStack = createStackNavigator();
 
 const AuthStackScreen = () => {
+  const { colors } = useTheme();
   return (
-    <AuthStack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: themeColors().background },
-        headerTintColor: themeColors().text,
-      }}
-    >
-      <AuthStack.Screen name="Boat Navigation" component={AuthScreen} />
-    </AuthStack.Navigator>
+    <NavigationContainer independent={true}>
+      <AuthStack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+        }}
+      >
+        <AuthStack.Screen name="Boat Navigation" component={AuthScreen} />
+      </AuthStack.Navigator>
+    </NavigationContainer>
   );
 };
 
 const MainStack = createStackNavigator();
 
 const MainStackScreen = () => {
+  const { colors } = useTheme();
   return (
-    <MainStack.Navigator screenOptions={{ 
-      headerStyle: { backgroundColor: themeColors().background },
-      headerTintColor: themeColors().text,
-     }}
-     >
+    <MainStack.Navigator screenOptions={{
+      headerStyle: { backgroundColor: colors.background },
+      headerTintColor: colors.text,
+    }}
+    >
       <MainStack.Screen name="Map" component={MainScreen} />
     </MainStack.Navigator>
   );
@@ -56,11 +54,12 @@ const MainStackScreen = () => {
 const InfoStack = createStackNavigator();
 
 const InfoStackScreen = () => {
+  const { colors } = useTheme();
   return (
     <InfoStack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: themeColors().background },
-        headerTintColor: themeColors().text,
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.text,
       }}
     >
       <InfoStack.Screen name="Info" component={InfoScreen} />
@@ -75,11 +74,12 @@ const InfoStackScreen = () => {
 const SettingsStack = createStackNavigator();
 
 const SettingsStackScreen = () => {
+  const { colors } = useTheme();
   return (
     <SettingsStack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: themeColors().background },
-        headerTintColor: themeColors().text,
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.text,
       }}
     >
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
@@ -92,21 +92,15 @@ const SettingsStackScreen = () => {
 const Tab = createBottomTabNavigator();
 
 const TabNavigatorScreen = () => {
+  const { colors } = useTheme();
   return (
-    <Tab.Navigator
-      tabBarOptions={{
-        activeTintColor: themeColors().accent,
-        activeBackgroundColor: themeColors().background,
-        inactiveTintColor: themeColors().tint,
-        inactiveBackgroundColor: themeColors().secondary,
-      }}
-    >
+    <Tab.Navigator>
       <Tab.Screen
         name="Map"
         component={MainStackScreen}
         options={{
-          tabBarIcon: () => (
-            <Icon name="md-boat" style={{ color: themeColors().tint }} />
+          tabBarIcon: ({color}) => (
+            <Icon name="md-boat" color={color} style={{ color: "#5ADFFF" }} />
           ),
         }}
       />
@@ -114,8 +108,8 @@ const TabNavigatorScreen = () => {
         name="Info"
         component={InfoStackScreen}
         options={{
-          tabBarIcon: () => (
-            <Icon name="md-cloudy" style={{ color: themeColors().tint }} />
+          tabBarIcon: ({color}) => (
+            <Icon name="md-cloudy" color={color} style={{ color: "#5ADFFF" }} />
           ),
         }}
       />
@@ -123,8 +117,8 @@ const TabNavigatorScreen = () => {
         name="Settings"
         component={SettingsStackScreen}
         options={{
-          tabBarIcon: () => (
-            <Icon name="md-menu" style={{ color: themeColors().tint }} />
+          tabBarIcon: ({color}) => (
+            <Icon name="md-menu" color={color} style={{ color: "#5ADFFF" }} />
           ),
         }}
       />
@@ -150,22 +144,25 @@ const Navigation = () => {
 
   fb.auth().onAuthStateChanged((user) => {
     user ? setSigned(true) : setSigned(false);
-    setIsLoading(false);
+    setIsLoading(false)
   });
+
+  // to avoid "React has detected a change in the order of Hooks called by Navigation."
+  // splashscreen has to load right after the usecontext hook
+  const loadSplashScreen = () => {
+  if (isLoading) {
+    return (
+      <SplashScreen/>
+    )
+  }
+}
 
   return (
     <ThemeContext.Provider value={themePreference}>
-      <PaperProvider theme={theme}>
-        <NavigationContainer theme={theme}>
-          {isLoading ? (
-            <SplashScreen />
-          ) : isSigned ? (
-            TabNavigatorScreen()
-          ) : (
-                AuthStackScreen()
-              )}
-        </NavigationContainer>
-      </PaperProvider>
+      {loadSplashScreen()}
+      <NavigationContainer theme={theme}>
+      {isSigned ? ( TabNavigatorScreen() ) : ( AuthStackScreen() )}
+      </NavigationContainer>
     </ThemeContext.Provider>
   );
 };

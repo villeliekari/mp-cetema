@@ -10,8 +10,8 @@ import {
   View
 } from "native-base";
 import firebase from "../helpers/Firebase";
-import { useFocusEffect } from "@react-navigation/native";
-import { useTheme, Switch, TouchableRipple } from 'react-native-paper';
+import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { Switch, TouchableRipple } from 'react-native-paper';
 import ThemeContext from '../helpers/ThemeContext';
 
 const SettingsScreen = (props) => {

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {Image} from 'react-native';
 import {
   Body,
@@ -11,14 +11,14 @@ import {
 } from "native-base";
 import * as Location from "expo-location";
 import weatherApi from "../helpers/WeatherApi";
-import {useTheme} from '../helpers/ThemeContext';
+import { useTheme } from "@react-navigation/native";
 
 const InfoScreen = (props) => {
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
   const [seaObs, setSeaObs] = useState([]);
   const [weatherObs, setWeatherObs] = useState({});
 
-  const {colors, isDark} = useTheme();
+  const { colors } = useTheme();
 
   const containerStyle = {
     backgroundColor: colors.background

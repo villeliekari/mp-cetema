@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Container, Fab, Button, View, Header, Icon } from "native-base";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert, StyleSheet } from 'react-native';
+import { Alert } from 'react-native';
 import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
 import { withinRadius } from '../helpers/Utility'
 import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
+import ThemeContext from '../helpers/ThemeContext';
 
 import { useTheme } from 'react-native-paper';
 
@@ -26,6 +26,8 @@ const MainScreen = () => {
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
 
   const { colors } = useTheme();
+
+  const { isDarkTheme } = useContext(ThemeContext)
 
   const containerStyle = {
     backgroundColor: colors.background
@@ -351,6 +353,7 @@ const MainScreen = () => {
           longitudeDelta: 0.1,
         }}
         provider={PROVIDER_GOOGLE}
+        customMapStyle={ isDarkTheme ? mapStyleDark : mapStyleLight }
         showsUserLocation={true}
         followsUserLocation={true}
         showsMyLocationButton={true}
