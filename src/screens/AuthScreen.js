@@ -103,7 +103,7 @@ const AuthScreen = () => {
               />
             </Item>
             <Button 
-              style={primary,{ alignSelf: "center", margin: 10 }}
+              style={{ alignSelf: "center", margin: 10 }}
               onPress={() => userLogin()}
             >
               <Text style={textStyle}>Login</Text>
