@@ -3,7 +3,7 @@
 // Light theme colors
 export const lightColors = {
   background: '#FFFFFF',
-  secondary: '#bbb',
+  secondary: '#3282b8',
   text: '#121212',
   error: '#D32F2F',
   primary: '#2dafff',
