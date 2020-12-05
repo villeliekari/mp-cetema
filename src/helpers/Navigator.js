@@ -9,10 +9,11 @@ import AuthScreen from "../screens/AuthScreen";
 import MainScreen from "../screens/MainScreen";
 import InfoScreen from "../screens/InfoScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import ModifyScreen from "../screens/MofidyScreen";
 import NauticalScreen from "../screens/NauticalScreen";
 import NauticalDetails from "../screens/NauticalScreenSingle";
 import Forecast from "../screens/Forecast";
-import {useTheme} from '../helpers/ThemeContext';
+import { useTheme } from "../helpers/ThemeContext";
 
 const themeColors = () => {  
     const {colors, isDark} = useTheme();
@@ -41,15 +42,11 @@ const AuthStackScreen = () => {
 
 const MainStackScreen = () => {
   return (
-    <MainStack.Navigator
-    screenOptions={{headerShown: false}}
-    >
+    <MainStack.Navigator screenOptions={{ headerShown: false }}>
       <MainStack.Screen name="Map" component={MainScreen} />
     </MainStack.Navigator>
   );
 };
-
-
 
 const InfoStackScreen = () => {
   return (
@@ -78,7 +75,7 @@ const SettingsStackScreen = () => {
       }}
     >
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
-      <SettingsStack.Screen name="Theme" component={SettingsScreen} />
+      <SettingsStack.Screen name="Modify" component={ModifyScreen} />
       <SettingsStack.Screen name="About" component={SettingsScreen} />
     </SettingsStack.Navigator>
   );
@@ -131,16 +128,21 @@ const Navigation = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   fb.auth().onAuthStateChanged((user) => {
-    user ? setSigned(true) : setSigned(false)
-    setIsLoading(false)
+    user ? setSigned(true) : setSigned(false);
+    setIsLoading(false);
   });
 
   return (
     <NavigationContainer>
-      { isLoading ? ( <SplashScreen /> ) : (isSigned ? (TabNavigatorScreen()) : (AuthStackScreen()))}
+      {isLoading ? (
+        <SplashScreen />
+      ) : isSigned ? (
+        TabNavigatorScreen()
+      ) : (
+        AuthStackScreen()
+      )}
     </NavigationContainer>
-  )
-
-}
+  );
+};
 
 export default Navigation;
