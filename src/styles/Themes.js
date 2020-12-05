@@ -6,18 +6,18 @@ export const lightColors = {
   secondary: '#bbb',
   text: '#121212',
   error: '#D32F2F',
-  primary: '#512DA8',
-  accent: '#4af',
+  primary: '#2dafff',
+  accent: '#3282b8',
   tint: '#000',
 };
 
 // Dark theme colors
 export const darkColors = {
   background: '#121212',
-  secondary: '#555',
+  secondary: '#1b262c',
   text: '#FFFFFF',
   error: '#EF9A9A',
-  primary: '#B39DDB',
-  accent: '#8bf',
+  primary: '#0f4c75',
+  accent: '#1b262c',
   tint: '#fff',
 };

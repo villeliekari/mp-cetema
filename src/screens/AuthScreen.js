@@ -11,6 +11,7 @@ import {
 } from "native-base";
 import { Alert } from "react-native";
 import fb from "../helpers/Firebase";
+import {useTheme} from '../helpers/ThemeContext';
 
 const AuthScreen = () => {
   const [name, setName] = useState(null);
@@ -18,6 +19,19 @@ const AuthScreen = () => {
   const [password, setPassword] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState(null);
   const [hasAccount, switchForm] = useState(false);
+  const {colors, isDark} = useTheme();
+
+  const containerStyle = {
+    backgroundColor: colors.background
+  };
+
+  const primary ={
+    backgroundColor: colors.primary
+  }
+
+  const textStyle = {
+    color: colors.text
+  }
 
   const userLogin = () => {
     if (email && password) {
@@ -68,31 +82,31 @@ const AuthScreen = () => {
   };
 
   return (
-    <Container>
-      <Body>
+    <Container style={containerStyle}>
+      <Body style={containerStyle}>
         {!hasAccount ? (
-          <Form>
+          <Form  style={containerStyle}>
             <Item stackedLabel>
-              <Label>Email</Label>
-              <Input
+              <Label style={textStyle}>Email</Label>
+              <Input style={textStyle}
                 autoCapitalize="none"
                 value={email}
                 onChangeText={(val) => setEmail(val)}
               />
             </Item>
             <Item stackedLabel>
-              <Label>Password</Label>
-              <Input
+              <Label style={textStyle}>Password</Label>
+              <Input style={textStyle}
                 value={password}
                 onChangeText={(val) => setPassword(val)}
                 secureTextEntry
               />
             </Item>
-            <Button
-              style={{ alignSelf: "center", margin: 10 }}
+            <Button 
+              style={primary,{ alignSelf: "center", margin: 10 }}
               onPress={() => userLogin()}
             >
-              <Text>Login</Text>
+              <Text style={textStyle}>Login</Text>
             </Button>
 
             <Button transparent onPress={() => switchForm(!hasAccount)}>
@@ -102,28 +116,30 @@ const AuthScreen = () => {
         ) : (
           <Form>
             <Item stackedLabel>
-              <Label>Name</Label>
-              <Input value={name} onChangeText={(val) => setName(val)} />
+              <Label style={textStyle}>Name</Label>
+              <Input style={textStyle} value={name} onChangeText={(val) => setName(val)} />
             </Item>
             <Item stackedLabel>
-              <Label>Email</Label>
+              <Label style={textStyle}>Email</Label>
               <Input
+               style={textStyle}
                 autoCapitalize="none"
                 value={email}
                 onChangeText={(val) => setEmail(val)}
               />
             </Item>
             <Item stackedLabel>
-              <Label>Password</Label>
+              <Label style={textStyle}>Password</Label>
               <Input
+              style={textStyle}
                 value={password}
                 onChangeText={(val) => setPassword(val)}
                 secureTextEntry
               />
             </Item>
             <Item stackedLabel>
-              <Label>Confirm Password</Label>
-              <Input
+              <Label style={textStyle}>Confirm Password</Label>
+              <Input style={textStyle}
                 value={confirmPassword}
                 onChangeText={(val) => setConfirmPassword(val)}
                 secureTextEntry
