@@ -12,6 +12,7 @@ import {
 import { Alert } from "react-native";
 import firebase from "../helpers/Firebase";
 import asyncStorage from "../helpers/AsyncStorage";
+import {useTheme} from '../helpers/ThemeContext';
 
 const AuthScreen = () => {
   const [name, setName] = useState(null);

@@ -55,12 +55,12 @@ const SettingsScreen = (props) => {
     <Container style={containerStyle}>
       <Content>
         <Card>
-          <CardItem header>
-            <Text>User infromation WIP</Text>
+          <CardItem header style={containerStyle}>
+            <Text style={textStyle}>User infromation WIP</Text>
           </CardItem>
-          <CardItem>
+          <CardItem style={containerStyle}>
             <Body>
-              <Text>
+              <Text style={textStyle}>
                 Name: {name}
                 {"\n"}
                 Email: {email}
@@ -72,7 +72,7 @@ const SettingsScreen = (props) => {
               </Text>
             </Body>
           </CardItem>
-          <CardItem style={{ justifyContent: "center" }}>
+          <CardItem style={{ justifyContent: "center", backgroundColor: colors.background }}>
             <Button
               warning
               transparent
