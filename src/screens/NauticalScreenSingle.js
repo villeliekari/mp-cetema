@@ -1,29 +1,52 @@
-import React, { useEffect, useState } from "react";
-import { Body, Card, CardItem, Container, Content, Text } from "native-base";
+import React, {useEffect, useState} from "react";
+import {Body, Card, CardItem, Container, Content, Text, H3} from "native-base";
+import MapView, {Marker, PROVIDER_GOOGLE} from "react-native-maps";
 import {useTheme} from "../helpers/ThemeContext";
 
 const NauticalScreenSingle = (props) => {
-  const [nauticalWarning, setNauticalWarning] = useState({});
+  const [nauticalWarning, setNauticalWarning] = useState(null);
   const {colors} = useTheme();
 
   useEffect(() => {
-    setNauticalWarning(props.route.params.warning.properties);
+    setNauticalWarning(props.route.params.warning);
   }, []);
 
   return (
     <Container style={{backgroundColor:colors.background}}>
-      <Content>
-        <Body style={{backgroundColor:colors.background}}>
-          <Card>
-            <CardItem style={{backgroundColor:colors.background}}>
-              <Text style={{color:colors.text}}>
-                {nauticalWarning.areasEn}, {nauticalWarning.locationEn}:{" "}
-                {nauticalWarning.contentsEn}
-              </Text>
-            </CardItem>
-          </Card>
-        </Body>
-      </Content>
+      {nauticalWarning ?
+        <>
+          <Content>
+            <Card>
+              <CardItem>
+                <H3>{nauticalWarning.properties.areasEn}
+                </H3>
+              </CardItem>
+              <CardItem><Text>
+                {nauticalWarning.properties.locationEn}:{" "}
+                {nauticalWarning.properties.contentsEn}</Text>
+              </CardItem>
+              <CardItem>
+                <MapView style={{flex: 1, height: 200}}
+                  initialRegion={{
+                    latitude: nauticalWarning.geometry.coordinates[1],
+                    longitude: nauticalWarning.geometry.coordinates[0],
+                    latitudeDelta: 0.1,
+                    longitudeDelta: 0.1,
+                  }}
+                  provider={PROVIDER_GOOGLE}>
+                  <Marker
+                    key={'asd'}
+                    coordinate={{
+                      latitude: nauticalWarning.geometry.coordinates[1],
+                      longitude: nauticalWarning.geometry.coordinates[0],
+                    }}
+                    title={nauticalWarning.properties.locationEn}
+                  />
+                </MapView>
+              </CardItem>
+            </Card>
+          </Content>
+        </> : <Text>Loading</Text>}
     </Container>
   );
 };

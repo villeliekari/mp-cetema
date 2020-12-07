@@ -3,6 +3,7 @@ import {
   Body,
   Button,
   Card,
+  CardItem,
   Container,
   Content,
   Form,
@@ -141,6 +142,37 @@ const ModifyScreen = (props) => {
     } else Alert.alert("Fill all fields");
   };
 
+  const deleteUserLocationData = () => {
+    Alert.alert(
+      "Are you sure you want to delete your location data?",
+      "This will remove your marker from others and disable collision warnings.",
+      [
+        {
+          text: "Yes",
+          onPress: async () => {
+            try {
+              await firebase
+                .firestore()
+                .collection("userLocations")
+                .doc(firebase.auth().currentUser.uid)
+                .delete()
+                .catch((err) => {
+                  throw new Error(err.message);
+                });
+
+              Alert.alert("Location data deleted");
+              props.navigation.navigate("Settings");
+            } catch (err) {
+              Alert.alert(err);
+            }
+          },
+        },
+        { text: "No", style: "cancel" },
+      ],
+      { cancelable: false }
+    );
+  };
+
   useEffect(() => {
     setName(firebase.auth().currentUser.displayName);
     setEmail(firebase.auth().currentUser.email);
@@ -166,6 +198,9 @@ const ModifyScreen = (props) => {
     <Container style={containerStyle}>
       <Content>
         <Card style={{backgroundColor: colors.background}}>
+          <CardItem header bordered>
+            <Text>Change user infromation</Text>
+          </CardItem>
           <Form>
             <Item stackedLabel>
               <Label>Name</Label>
@@ -197,6 +232,9 @@ const ModifyScreen = (props) => {
         </Card>
 
         <Card style={{backgroundColor: colors.background}}>
+          <CardItem header bordered>
+            <Text>Change Password</Text>
+          </CardItem>
           <Form>
             <Item stackedLabel>
               <Label>Current Password</Label>
@@ -232,6 +270,9 @@ const ModifyScreen = (props) => {
         </Card>
 
         <Card style={{backgroundColor: colors.background}}>
+          <CardItem header bordered>
+            <Text>Change boat infromation</Text>
+          </CardItem>
           <Form>
             <Item stackedLabel>
               <Label>Boat name</Label>
@@ -262,6 +303,22 @@ const ModifyScreen = (props) => {
               <Text>Update boat information</Text>
             </Button>
           </Form>
+        </Card>
+
+        <Card>
+          <CardItem header bordered>
+            <Text>Delete location data</Text>
+          </CardItem>
+          <Body>
+            <Button
+              danger
+              transparent
+              style={{ alignSelf: "center", margin: 10 }}
+              onPress={deleteUserLocationData}
+            >
+              <Text>Delete location data</Text>
+            </Button>
+          </Body>
         </Card>
       </Content>
     </Container>

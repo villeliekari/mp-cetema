@@ -11,7 +11,7 @@ import {
   H1,
   H3
 } from "native-base";
-import weatherApi from "../helpers/WeatherApi";
+import {weatherApi} from "../helpers/WeatherApi";
 import * as Location from "expo-location";
 import {useTheme} from '../helpers/ThemeContext';
 
@@ -78,11 +78,13 @@ const Forecast = () => {
   }, []);
 
   return (
-    <Container >
-      <Content style={containerStyle}>
-        <Body style={containerStyle}>
-          <Card style={containerStyle}>
-            <H1 style={textStyle}>Marine forecast at your location</H1>
+    <Container style={containerStyle}>
+      {seaObs ?
+        <>
+      <Content ref={c => (this.component = c)}>
+        <Body>
+          <Card>
+            <H1>Marine forecast at your location</H1>
           </Card>
           {seaObs.map((item, i) => {
             return (
@@ -110,6 +112,7 @@ const Forecast = () => {
           </Button>
         </Body>
       </Content>
+      </> : <Text>Loading</Text>}
     </Container>
   );
 };
