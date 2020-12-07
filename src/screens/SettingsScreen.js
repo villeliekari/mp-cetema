@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Body,
   Button,
@@ -7,11 +7,12 @@ import {
   Container,
   Content,
   Text,
+  View
 } from "native-base";
 import firebase from "../helpers/Firebase";
-import { useTheme } from "../helpers/ThemeContext";
-import { DarkModeToggle } from "../helpers/Switch";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { Switch, TouchableRipple } from 'react-native-paper';
+import ThemeContext from '../helpers/ThemeContext';
 
 const SettingsScreen = (props) => {
   const [name, setName] = useState(null);
@@ -19,7 +20,7 @@ const SettingsScreen = (props) => {
   const [boatName, setBoatName] = useState(null);
   const [boatType, setBoatType] = useState(null);
 
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   const containerStyle = {
     backgroundColor: colors.background,
@@ -28,6 +29,8 @@ const SettingsScreen = (props) => {
   const textStyle = {
     color: colors.text,
   };
+
+  const { isDarkTheme, toggleTheme } = useContext(ThemeContext)
 
   useFocusEffect(() => {
     setName(firebase.auth().currentUser.displayName);
@@ -93,10 +96,12 @@ const SettingsScreen = (props) => {
             <Text>App settings</Text>
           </CardItem>
           <CardItem>
-            <Body>
-              <Text>Toggle Darkmode</Text>
-              <DarkModeToggle />
-            </Body>
+            <TouchableRipple>
+              <View>
+                <Text>Toggle Dark Theme</Text>
+                <Switch value={isDarkTheme === true} onValueChange={toggleTheme} />
+              </View>
+            </TouchableRipple>
           </CardItem>
         </Card>
       </Content>

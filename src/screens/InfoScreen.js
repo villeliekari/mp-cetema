@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {Image} from 'react-native';
 import {
   Body,
@@ -19,7 +19,7 @@ const InfoScreen = (props) => {
   const [seaObs, setSeaObs] = useState([]);
   const [weatherObs, setWeatherObs] = useState({});
 
-  const {colors, isDark} = useTheme();
+  const { colors } = useTheme();
 
   const containerStyle = {
     backgroundColor: colors.background

@@ -1,15 +1,16 @@
-import React, {useEffect, useState} from "react";
-import {Container, Fab, Button, View, Header, Icon} from "native-base";
+import React, { useEffect, useState, useContext } from "react";
+import { Container, Fab, Button, View, Header, Icon } from "native-base";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert, StyleSheet } from 'react-native';
+import { Alert } from 'react-native';
 import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
-import {withinRadius} from '../helpers/Utility'
+import { withinRadius } from '../helpers/Utility'
 import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
-import {useTheme} from '../helpers/ThemeContext';
+import ThemeContext from '../helpers/ThemeContext';
+
+import { useTheme } from 'react-native-paper';
 
 import firebase from "../helpers/Firebase";
 
@@ -24,8 +25,9 @@ const MainScreen = () => {
   const [active, setActive] = useState(false);
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
 
-  
-  const {colors, isDark} = useTheme();
+  const { colors } = useTheme();
+
+  const { isDarkTheme } = useContext(ThemeContext)
 
   const containerStyle = {
     backgroundColor: colors.background
@@ -67,7 +69,7 @@ const MainScreen = () => {
       // .where can't be used on query because inequality isn't supported
       const filterTime = Date.now() - 3600000;
       const geocollection = GeoFirestore.collection('userLocations')
-      const query = geocollection.near({center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100})
+      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100 })
       query.onSnapshot(snap => {
         let array = []
         snap.forEach(doc => {
@@ -136,7 +138,7 @@ const MainScreen = () => {
       username: firebase.auth().currentUser.displayName,
       //boatname and so on.
     };
-    
+
     try {
       await firebase
         .firestore()
@@ -160,14 +162,14 @@ const MainScreen = () => {
           throw new Error("Error adding document: ", error);
         });
     } catch (err) {
-      Alert.alert(err);
+      Alert.alert(err.message);
     }
     setLocationState(true)
   }
 
   const getUserLocation = async () => {
     console.log("Getting user location...");
-    let {status} = await Location.requestPermissionsAsync();
+    let { status } = await Location.requestPermissionsAsync();
     if (status !== "granted") {
       setErrorMsg("Permission to access location was denied");
     }
@@ -193,10 +195,10 @@ const MainScreen = () => {
       'SOS Alert',
       'People nearby will receive your alert',
       [
-        {text: 'Rescued', onPress: () => updateSosAlert('rescued')},
-        {text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel'}
+        { text: 'Rescued', onPress: () => updateSosAlert('rescued') },
+        { text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel' }
       ],
-      {cancelable: false}
+      { cancelable: false }
     );
   };
 
@@ -219,7 +221,7 @@ const MainScreen = () => {
         },
         { text: 'Cancel', onPress: () => setRescueMarkers([]), style: 'cancel' }
       ],
-      {cancelable: true}
+      { cancelable: true }
     )
   }
 
@@ -267,7 +269,7 @@ const MainScreen = () => {
       firebase.firestore()
         .collection('sos')
         .doc(firebase.auth().currentUser.uid)
-        .set(sosData, {merge: true})
+        .set(sosData, { merge: true })
         .then((doc) => {
           console.log('New SOS document added')
         }).catch((error) => {
@@ -343,7 +345,7 @@ const MainScreen = () => {
   return (
     <Container style={containerStyle}>
       <MapView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         initialRegion={{
           latitude: 60.1587262,
           longitude: 24.922834,
@@ -351,7 +353,7 @@ const MainScreen = () => {
           longitudeDelta: 0.1,
         }}
         provider={PROVIDER_GOOGLE}
-        customMapStyle={isDark ? mapStyleDark : mapStyleLight}
+        customMapStyle={ isDarkTheme ? mapStyleDark : mapStyleLight }
         showsUserLocation={true}
         followsUserLocation={true}
         showsMyLocationButton={true}
@@ -371,7 +373,7 @@ const MainScreen = () => {
               }}
               title={res.mmsi.toString()}
               description={`${(currentTime - res.properties.timestampExternal) / 1000
-              }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
+                }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
               image={vesselIcon}
             />
           );
@@ -387,9 +389,8 @@ const MainScreen = () => {
                   longitude: res.g.geopoint.longitude,
                 }}
                 title={res.username}
-                description={`type: ${res.boatType}, name: ${
-                  res.boatName
-                }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
+                description={`type: ${res.boatType}, name: ${res.boatName
+                  }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
                 image={require("../../assets/usericon.png")}
               />
             );
@@ -413,7 +414,7 @@ const MainScreen = () => {
         active={active}
         direction="up"
         containerStyle={{}}
-        style={{backgroundColor: '#5067FF'}}
+        style={{ backgroundColor: '#5067FF' }}
         position="bottomRight"
         onPress={() => sendSosAlert()}>
         <Icon name="medkit" />
