@@ -13,25 +13,10 @@ import {
 } from "native-base";
 import {weatherApi} from "../helpers/WeatherApi";
 import * as Location from "expo-location";
-import {useTheme} from '../helpers/ThemeContext';
 
 const Forecast = () => {
   const [seaObs, setSeaObs] = useState([]);
   const [weatherObs, setWeatherObs] = useState([]);
-
-  const {colors, isDark} = useTheme();
-
-  const containerStyle = {
-    backgroundColor: colors.background
-  };
-
-  const primary ={
-    backgroundColor: colors.primary
-  }
-
-  const textStyle = {
-    color: colors.text
-  }
 
   const getLocAndFetch = async () => {
     console.log("Forecast user location..");
@@ -78,7 +63,7 @@ const Forecast = () => {
   }, []);
 
   return (
-    <Container style={containerStyle}>
+    <Container>
       {seaObs ?
         <>
       <Content ref={c => (this.component = c)}>
@@ -88,27 +73,26 @@ const Forecast = () => {
           </Card>
           {seaObs.map((item, i) => {
             return (
-              <Card key={i} style={containerStyle}>
-                <CardItem style={containerStyle}>
-                <H3 style={textStyle}>{item.time ? `${item.time.substring(0, 10)}` : "Can't fetch time"}</H3>
-                  <H3 style={textStyle}>{item.time ? ` ${item.time.substring(11, 16)}` : "Can't fetch time"}</H3>
+              <Card key={i}>
+                <CardItem>
+                <H3>{item.time ? `${item.time.substring(0, 10)}` : "Can't fetch time"}</H3>
+                  <H3>{item.time ? ` ${item.time.substring(11, 16)}` : "Can't fetch time"}</H3>
                 </CardItem>
-                <CardItem style={containerStyle}>
-                  <Text style={textStyle}>{item.seaTemp ? `Seawater temperature: ${item.seaTemp}°C` : "Can't fetch temp"}</Text>
+                <CardItem>
+                  <Text>{item.seaTemp ? `Seawater temperature: ${item.seaTemp}°C` : "Can't fetch temp"}</Text>
                 </CardItem>
-                <CardItem style={containerStyle}>
-                  <Text style={textStyle}>{item.sigWaveHeight ? `Wave height: ${item.sigWaveHeight}m` : "Can't fetch wave height"}</Text>
+                <CardItem>
+                  <Text>{item.sigWaveHeight ? `Wave height: ${item.sigWaveHeight}m` : "Can't fetch wave height"}</Text>
                 </CardItem>
-                <CardItem style={containerStyle}>
-                  <Text style={textStyle}>{item.waveDir ? `Wave direction: ${item.waveDir}` : "Can't fetch wave dir"}</Text>
+                <CardItem>
+                  <Text>{item.waveDir ? `Wave direction: ${item.waveDir}` : "Can't fetch wave dir"}</Text>
                 </CardItem>
               </Card>
             );
           })}
           <Button block light
-            style={primary}
             onPress={() => this.component._root.scrollToPosition(0, 0)}>
-            <Text style={textStyle}>Back to top</Text>
+            <Text>Back to top</Text>
           </Button>
         </Body>
       </Content>

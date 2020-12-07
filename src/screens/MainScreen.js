@@ -362,8 +362,8 @@ const MainScreen = () => {
           const currentTime = Date.now();
           const vesselIcon =
             res.shipType > 60
-              ? isDark? require("../../assets/cargoshipiconDark.png"): require("../../assets/cargoshipicon.png")
-              : isDark? require("../../assets/boaticonDark.png"): require("../../assets/boaticon.png");
+              ? require("../../assets/cargoshipicon.png")
+              : require("../../assets/boaticon.png");
           return (
             <Marker
               key={i}
