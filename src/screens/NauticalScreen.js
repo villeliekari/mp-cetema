@@ -1,8 +1,11 @@
 import React, {useEffect, useState} from "react";
+
+import {useTheme} from "../helpers/ThemeContext";
 import {Body, Card, CardItem, Container, Content, Text, Button, H3} from "native-base";
 
 const NauticalScreen = (props) => {
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
+  const {colors} = useTheme();
 
   const fetchData = () => {
     fetch("https://meri.digitraffic.fi/api/v1/nautical-warnings/published")
@@ -19,7 +22,7 @@ const NauticalScreen = (props) => {
   }, []);
 
   return (
-    <Container>
+    <Container style={{backgroundColor: colors.background}>
       <Content ref={c => (this.component = c)}>
           {nauticalWarnings.map((warning, i) => {
             return (
@@ -42,7 +45,7 @@ const NauticalScreen = (props) => {
                 </Card>
             );
           })}
-          <Button block light
+          <Button block light style={{backgroundColor:colors.primary}}
             onPress={() => this.component._root.scrollToPosition(0, 0)}>
             <Text>Back to top</Text>
           </Button>

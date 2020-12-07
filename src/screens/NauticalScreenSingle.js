@@ -1,16 +1,18 @@
 import React, {useEffect, useState} from "react";
 import {Body, Card, CardItem, Container, Content, Text, H3} from "native-base";
 import MapView, {Marker, PROVIDER_GOOGLE} from "react-native-maps";
+import {useTheme} from "../helpers/ThemeContext";
 
 const NauticalScreenSingle = (props) => {
   const [nauticalWarning, setNauticalWarning] = useState(null);
+  const {colors} = useTheme();
 
   useEffect(() => {
     setNauticalWarning(props.route.params.warning);
   }, []);
 
   return (
-    <Container>
+    <Container style={{backgroundColor:colors.background}}>
       {nauticalWarning ?
         <>
           <Content>

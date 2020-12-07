@@ -13,6 +13,7 @@ import {
 import * as Location from "expo-location";
 import {weatherApi} from "../helpers/WeatherApi";
 import {useTheme} from '../helpers/ThemeContext';
+import {MyText} from '../helpers/TextField';
 
 const InfoScreen = (props) => {
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
@@ -24,6 +25,10 @@ const InfoScreen = (props) => {
   const containerStyle = {
     backgroundColor: colors.background
   };
+
+  const primary ={
+    backgroundColor: colors.primary
+  }
 
   const textStyle = {
     color: colors.text
@@ -111,41 +116,42 @@ const InfoScreen = (props) => {
             }
           })}
           <Button block light
+            style={primary}
             onPress={() => props.navigation.navigate("Nautical Warnings")}
           >
-            <Text>Show all Nautical Warnings</Text>
+            <Text style={textStyle}>Show all Nautical Warnings</Text>
           </Button>
-          <Card>
-            <CardItem header button onPress={() => props.navigation.navigate("Forecast")}>
-              <Text
-                style={{fontWeight: "bold"}}>Sea state at your location: </Text>
+          <Card style={containerStyle}>
+            <CardItem header button
+            style={containerStyle} onPress={() => props.navigation.navigate("Forecast")}>
+              <Text style={{fontWeight: "bold"}, textStyle}>Sea state at your location: </Text>
             </CardItem>
-            <CardItem button onPress={() => props.navigation.navigate("Forecast")}>
+            <CardItem style={containerStyle} button onPress={() => props.navigation.navigate("Forecast")}>
               <Image source={{uri: 'https://developer.foreca.com/static/images/symbols_pastel/' + (weatherObs.symbol) + '.png'}} style={{
                 flex: 1,
                 aspectRatio: 4,
                 resizeMode: 'contain'
               }} />
             </CardItem>
-            <CardItem>
-              <Text>{weatherObs.temperature ? `Air temperature: ${weatherObs.temperature}°C` : "Can't fetch air temp"}</Text>
-              <Text>{weatherObs.symbolPhrase ? `,  ${weatherObs.symbolPhrase}` : "Can't fetch string"}</Text>
+            <CardItem style={containerStyle}>
+              <Text style={textStyle}>{weatherObs.temperature ? `Air temperature: ${weatherObs.temperature}°C` : "Can't fetch air temp"}</Text>
+              <Text style={textStyle}>{weatherObs.symbolPhrase ? `,  ${weatherObs.symbolPhrase}` : "Can't fetch string"}</Text>
             </CardItem>
-            <CardItem>
-              <Text>{seaObs[0] ? `Seawater temperature: ${seaObs[0].seaTemp}°C` : "Can't fetch temperature"}</Text>
+            <CardItem style={containerStyle}>
+              <Text style={textStyle}>{seaObs[0] ? `Seawater temperature: ${seaObs[0].seaTemp}°C` : "Can't fetch temperature"}</Text>
             </CardItem>
-            <CardItem>
-              <Text>{weatherObs.windSpeed ? `Wind: ${weatherObs.windSpeed}m/s` : "Can't fetch wind speed"}</Text>
-              <Text>{weatherObs.windDirString ? ` ${weatherObs.windDirString}` : "Can't fetch wind dir"}</Text>
+            <CardItem style={containerStyle}>
+              <Text style={textStyle}>{weatherObs.windSpeed ? `Wind: ${weatherObs.windSpeed}m/s` : "Can't fetch wind speed"}</Text>
+              <Text style={textStyle}>{weatherObs.windDirString ? ` ${weatherObs.windDirString}` : "Can't fetch wind dir"}</Text>
             </CardItem>
-            <CardItem>
-              <Text>{seaObs[0] ? `Wave height: ${seaObs[0].sigWaveHeight}m` : "Can't fetch wave height"}</Text>
+            <CardItem style={containerStyle}>
+              <Text style={textStyle}>{seaObs[0] ? `Wave height: ${seaObs[0].sigWaveHeight}m` : "Can't fetch wave height"}</Text>
             </CardItem>
-            <CardItem>
-              <Text>{seaObs[0] ? `Wave direction: ${seaObs[0].waveDir}` : "Can't fetch wave direction"}</Text>
+            <CardItem style={containerStyle}>
+              <Text style={textStyle}>{seaObs[0] ? `Wave direction: ${seaObs[0].waveDir}` : "Can't fetch wave direction"}</Text>
             </CardItem>
-            <CardItem>
-              <Text>{weatherObs.visibility ? `Visibility: ${(weatherObs.visibility / 1000).toFixed(1)}km` : "Can't fetch visibility"}</Text>
+            <CardItem style={containerStyle}>
+              <Text style={textStyle}>{weatherObs.visibility ? `Visibility: ${(weatherObs.visibility / 1000).toFixed(1)}km` : "Can't fetch visibility"}</Text>
             </CardItem>
           </Card>
         </Body>

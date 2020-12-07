@@ -14,6 +14,7 @@ import {
 import { Alert } from "react-native";
 import firebase from "../helpers/Firebase";
 import asyncStorage from "../helpers/AsyncStorage";
+import {useTheme} from '../helpers/ThemeContext';
 
 const AuthScreen = () => {
   const [name, setName] = useState(null);
@@ -21,6 +22,19 @@ const AuthScreen = () => {
   const [password, setPassword] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState(null);
   const [hasAccount, switchForm] = useState(false);
+  const {colors, isDark} = useTheme();
+
+  const containerStyle = {
+    backgroundColor: colors.background
+  };
+
+  const primary ={
+    backgroundColor: colors.primary
+  }
+
+  const textStyle = {
+    color: colors.text
+  }
   const [boatName, setBoatName] = useState(null);
   const [boatType, setBoatType] = useState(null);
 
@@ -108,7 +122,7 @@ const AuthScreen = () => {
   }, []);
 
   return (
-    <Container>
+    <Container style={containerStyle}>
       <Content>
         <Card>
           {!hasAccount ? (
@@ -122,8 +136,9 @@ const AuthScreen = () => {
                 />
               </Item>
               <Item stackedLabel>
-                <Label>Password</Label>
+                <Label style={textStyle}>Password</Label>
                 <Input
+                  style={textStyle}
                   value={password}
                   onChangeText={(val) => setPassword(val)}
                   secureTextEntry
