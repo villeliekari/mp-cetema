@@ -1,8 +1,7 @@
-import React, {useState, useEffect} from "react";
-import {LogBox} from "react-native";
+import React, { useState, useEffect } from "react";
+import { LogBox } from "react-native";
 import * as Expo from "expo";
 import * as Font from "expo-font";
-import {StatusBar} from "expo-status-bar";
 import Navigation from "./src/helpers/Navigator";
 import * as Notifications from 'expo-notifications';
 
@@ -10,13 +9,19 @@ const App = () => {
   LogBox.ignoreLogs(["Setting a timer"]);
 
   Notifications.setNotificationHandler({
-    handleNotification: async() => ({shouldShowAlert: true, shouldPlaySound: false, shouldSetBadge: false})
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
   });
 
-  const [fontReady,
-    setFontReady] = useState(false);
-  const loadFonts = async() => {
-    await Font.loadAsync({Roboto: require("native-base/Fonts/Roboto.ttf"), Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf")});
+  const [fontReady, setFontReady] = useState(false);
+  const loadFonts = async () => {
+    await Font.loadAsync({
+      Roboto: require("native-base/Fonts/Roboto.ttf"),
+      Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),
+    });
     setFontReady(true);
   };
   useEffect(() => {
@@ -24,17 +29,13 @@ const App = () => {
   }, []);
 
   if (!fontReady) {
-    return <Expo.AppLoading/>;
+    return <Expo.AppLoading />;
   }
-  
-  //Status barstyle not working due to use of (headers) NativeBase
+
   return (
-    <AppearanceProvider>
-      <ThemeProvider>
-        <StatusBar style="light"/>
-        <Navigation/>
-      </ThemeProvider>
-    </AppearanceProvider>
+    <>
+        <Navigation  />  
+    </>
   );
 };
 

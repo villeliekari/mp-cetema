@@ -197,26 +197,26 @@ const ModifyScreen = (props) => {
   return (
     <Container style={containerStyle}>
       <Content>
-        <Card style={{backgroundColor: colors.background}}>
+        <Card>
           <CardItem header bordered>
             <Text>Change user infromation</Text>
           </CardItem>
           <Form>
             <Item stackedLabel>
               <Label>Name</Label>
-              <Input style={{color:colors.text}} value={name} onChangeText={(val) => setName(val)} />
+              <Input value={name} onChangeText={(val) => setName(val)} />
             </Item>
             <Item stackedLabel>
               <Label>Email</Label>
-              <Input style={{color:colors.text}}
+              <Input
                 autoCapitalize="none"
                 value={email}
                 onChangeText={(val) => setEmail(val)}
               />
             </Item>
-            <Item stackedLabel style={{color:colors.text}}>
+            <Item stackedLabel>
               <Label>Current Password</Label>
-              <Input style={{color:colors.text}}
+              <Input
                 secureTextEntry
                 onChangeText={(val) => setCurrentPassword(val)}
               />
@@ -231,7 +231,7 @@ const ModifyScreen = (props) => {
           </Form>
         </Card>
 
-        <Card style={{backgroundColor: colors.background}}>
+        <Card>
           <CardItem header bordered>
             <Text>Change Password</Text>
           </CardItem>
@@ -245,7 +245,7 @@ const ModifyScreen = (props) => {
             </Item>
             <Item stackedLabel>
               <Label>New Password</Label>
-              <Input style={{color:colors.text}}
+              <Input
                 secureTextEntry
                 value={password}
                 onChangeText={(val) => setPassword(val)}
@@ -253,7 +253,7 @@ const ModifyScreen = (props) => {
             </Item>
             <Item stackedLabel>
               <Label>Confirm new password</Label>
-              <Input style={{color:colors.text}}
+              <Input
                 secureTextEntry
                 value={confirmPassword}
                 onChangeText={(val) => setConfirmPassword(val)}
@@ -269,28 +269,28 @@ const ModifyScreen = (props) => {
           </Form>
         </Card>
 
-        <Card style={{backgroundColor: colors.background}}>
+        <Card>
           <CardItem header bordered>
             <Text>Change boat infromation</Text>
           </CardItem>
           <Form>
             <Item stackedLabel>
               <Label>Boat name</Label>
-              <Input style={{color:colors.text}}
+              <Input
                 value={boatName}
                 onChangeText={(val) => setBoatName(val)}
               />
             </Item>
             <Item stackedLabel>
               <Label>Boat type</Label>
-              <Input style={{color:colors.text}}
+              <Input
                 value={boatType}
                 onChangeText={(val) => setBoatType(val)}
               />
             </Item>
             <Item stackedLabel>
               <Label>Current Password</Label>
-              <Input style={{color:colors.text}}
+              <Input
                 secureTextEntry
                 onChangeText={(val) => setCurrentPassword(val)}
               />
