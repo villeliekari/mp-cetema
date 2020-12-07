@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Body, Card, CardItem, Container, Content, Text, Button} from "native-base";
+import {Body, Card, CardItem, Container, Content, Text, Button, H3} from "native-base";
 
 const NauticalScreen = (props) => {
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
@@ -21,29 +21,31 @@ const NauticalScreen = (props) => {
   return (
     <Container>
       <Content ref={c => (this.component = c)}>
-        <Body>
           {nauticalWarnings.map((warning, i) => {
             return (
               <Card key={i}>
-                <CardItem>
-                  <Text
-                    onPress={() =>
-                      props.navigation.navigate("Nautical Warning", {warning})
-                    }
-                  >
-                    {warning.properties.areasEn},{" "}
+                  <CardItem>
+                    <H3
+                      onPress={() =>
+                        props.navigation.navigate("Nautical Warning", {
+                          warning,
+                        })}>{warning.properties.areasEn}
+                    </H3>
+                  </CardItem>
+                  <CardItem><Text onPress={() =>
+                    props.navigation.navigate("Nautical Warning", {
+                      warning,
+                    })}>
                     {warning.properties.locationEn}:{" "}
-                    {warning.properties.contentsEn}
-                  </Text>
-                </CardItem>
-              </Card>
+                    {warning.properties.contentsEn}</Text>
+                  </CardItem>
+                </Card>
             );
           })}
           <Button block light
             onPress={() => this.component._root.scrollToPosition(0, 0)}>
             <Text>Back to top</Text>
           </Button>
-        </Body>
       </Content>
     </Container>
   );
