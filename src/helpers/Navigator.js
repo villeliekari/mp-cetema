@@ -13,7 +13,7 @@ import ModifyScreen from "../screens/MofidyScreen";
 import NauticalScreen from "../screens/NauticalScreen";
 import NauticalDetails from "../screens/NauticalScreenSingle";
 import Forecast from "../screens/Forecast";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import ThemeContext from './ThemeContext';
 import { CustomDarkTheme, CustomDefaultTheme } from '../styles/Themes';
 
@@ -146,6 +146,22 @@ const Navigation = () => {
     user ? setSigned(true) : setSigned(false);
     setIsLoading(false)
   });
+
+  const loadTheme = () => {
+    AsyncStorage.getItem('currentTheme').then(result => {
+      if (result === 'true') {
+      toggleTheme()
+      }
+    });
+  };
+
+  useEffect(() => {
+    loadTheme();
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.setItem('currentTheme', JSON.stringify(isDarkTheme));
+  }, [isDarkTheme]);
 
   // to avoid "React has detected a change in the order of Hooks called by Navigation."
   // splashscreen has to load right after the usecontext hook
