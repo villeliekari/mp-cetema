@@ -424,7 +424,7 @@ const MainScreen = () => {
           active={active}
           direction="up"
           containerStyle={{}}
-          style={{ backgroundColor: '#5067FF' }}
+          style={{ backgroundColor: '#5067FF', marginVertical: 15, }}
           position="bottomRight"
           onPress={() => sendSosAlert()}>
           <Icon name="medkit" />
@@ -437,9 +437,7 @@ const MainScreen = () => {
 const styles = StyleSheet.create({
 
   speedometerContainer: {
-    flexDirection: 'row',
-    marginVertical: 6,
-    backgroundColor: 'transparent',
+    marginVertical: 15,
   },
 
   mapContainer: {
