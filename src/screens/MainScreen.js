@@ -25,6 +25,9 @@ const MainScreen = () => {
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
   const [userSpeed, setUserSpeed] = useState(0);
 
+  const [collisionDetected, setCollisionDetected] = useState(false);
+  const [userWithinRadius, setUserWithinRadius] = useState([]);
+
   const { isDarkTheme } = useContext(ThemeContext)
 
   const GeoFirestore = geofirestore.initializeApp(firebase.firestore())
@@ -62,36 +65,41 @@ const MainScreen = () => {
       const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100 })
       query.onSnapshot(snap => {
         let array = []
+        let array2 = []
         snap.forEach(doc => {
           if (doc.exists && doc.data().timestamp >= filterTime) {
             array.push(doc.data())
 
-            /*if (doc.id != firebase.auth().currentUser.uid) {
+            if (doc.id != firebase.auth().currentUser.uid) {
               // set collision alert if not same uid and set radius
               // radius in km
-              const myLocation = {latitude: location.coords.latitude, longitude: location.coords.longitude}
-              const otherLocation = {latitude: doc.data().g.geopoint.latitude, longitude: doc.data().g.geopoint.longitude}
+              const myLocation = { latitude: location.coords.latitude, longitude: location.coords.longitude }
+              const otherLocation = { latitude: doc.data().g.geopoint.latitude, longitude: doc.data().g.geopoint.longitude }
               const radius = 0.1
 
               if (withinRadius(myLocation, otherLocation, radius)) {
-                sendCollisionAlert()
+                //sendCollisionAlert()
+                array2.push(doc.data())
               }
-            }*/
+            }
           }
         })
         setUserMarkers(array)
+        setUserWithinRadius(array2)
       })
     }
   }
 
   const sendCollisionAlert = () => {
-    Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Collision Alert!',
-        body: "You are too close to another vessel!",
-      },
-      trigger: null,
-    });
+    if (collisionDetected) {
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Collision Alert!',
+          body: "You are too close to another vessel!",
+        },
+        trigger: null,
+      });
+    }
   }
 
   const getShipMarkers = () => {
@@ -340,6 +348,20 @@ const MainScreen = () => {
   }, [needsRescue]);
 
   useEffect(() => {
+    if (userWithinRadius.length > 0) {
+      setCollisionDetected(true)
+      console.log("setCollisionDetected(true)")
+    } else {
+      console.log("setCollisionDetected(false)")
+      setCollisionDetected(false)
+    }
+  }, [userWithinRadius]);
+
+  useEffect(() => {
+    sendCollisionAlert();
+  }, [collisionDetected]);
+
+  useEffect(() => {
     getShipMarkers();
   }, [shipLocations, shipMetadata]);
 
@@ -411,10 +433,10 @@ const MainScreen = () => {
             size={150}
             outerColor="#d3d3d3"
             internalColor="#5ADFFF"
-            innerColor= "#ffffff"
+            innerColor="#ffffff"
             showText
             text={`${(userSpeed * 1.943844).toFixed(2)} knot`}
-            textStyle={{ color: '#5ADFFF', fontSize: 12}}
+            textStyle={{ color: '#5ADFFF', fontSize: 12 }}
             showLabels
             labelTextStyle={{ color: 'black' }}
             labelFormatter={number => `${number}`}
@@ -442,7 +464,7 @@ const styles = StyleSheet.create({
 
   fabStyle: {
     backgroundColor: '#5ADFFF',
-    marginVertical: 15, 
+    marginVertical: 15,
   },
 
   speedometerContainer: {
