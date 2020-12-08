@@ -12,7 +12,7 @@ import {
 } from "native-base";
 import * as Location from "expo-location";
 import {weatherApi} from "../helpers/WeatherApi";
-import {useTheme} from '../helpers/ThemeContext';
+import { useTheme } from "@react-navigation/native";
 
 const InfoScreen = (props) => {
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
