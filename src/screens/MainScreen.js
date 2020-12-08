@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Container, Fab, Button, View, Header, Icon } from "native-base";
+import { Container, Fab, Button, View, Header, Icon, Text } from "native-base";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
@@ -11,6 +11,7 @@ import * as Notifications from 'expo-notifications';
 import ThemeContext from '../helpers/ThemeContext';
 import { useTheme } from "@react-navigation/native";
 import firebase from "../helpers/Firebase";
+import Speedometer from 'react-native-speedometer-chart';
 
 const MainScreen = () => {
   const [location, setLocation] = useState(null);
@@ -18,22 +19,13 @@ const MainScreen = () => {
   const [shipMetadata, setShipMetadata] = useState(null);
   const [shipMarkers, setShipMarkers] = useState([]);
   const [userMarkers, setUserMarkers] = useState([]);
-  const [rescueMarkers, setRescueMarkers] = useState([]);
+  const [needsRescue, setNeedsRescue] = useState(false);
   const [locationState, setLocationState] = useState(false);
   const [active, setActive] = useState(false);
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
-
-  const { colors } = useTheme();
+  const [userSpeed, setUserSpeed] = useState(0);
 
   const { isDarkTheme } = useContext(ThemeContext)
-
-  const containerStyle = {
-    backgroundColor: colors.background
-  };
-
-  const textStyle = {
-    color: colors.text
-  }
 
   const GeoFirestore = geofirestore.initializeApp(firebase.firestore())
 
@@ -118,51 +110,54 @@ const MainScreen = () => {
   };
 
   const updateUserLocation = async (location) => {
-    const coords = {
-      lat: location.coords.latitude,
-      lng: location.coords.longitude
-    }
-    const geodata = {
-      geohash: geokit.hash(coords),
-      geopoint: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude)
-    }
-    const locationData = {
-      g: geodata,
-      heading: location.coords.heading,
-      speed: location.coords.speed,
-      accuracy: location.coords.accuracy,
-      timestamp: location.timestamp,
-      uid: firebase.auth().currentUser.uid,
-      username: firebase.auth().currentUser.displayName,
-      //boatname and so on.
-    };
+    if (location) {
+      const coords = {
+        lat: location.coords.latitude,
+        lng: location.coords.longitude
+      }
+      const geodata = {
+        geohash: geokit.hash(coords),
+        geopoint: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude)
+      }
+      const locationData = {
+        g: geodata,
+        heading: location.coords.heading,
+        speed: location.coords.speed,
+        accuracy: location.coords.accuracy,
+        timestamp: location.timestamp,
+        uid: firebase.auth().currentUser.uid,
+        username: firebase.auth().currentUser.displayName,
+        needsRescue: needsRescue
+      };
 
-    try {
-      await firebase
-        .firestore()
-        .collection("userBoats")
-        .doc(firebase.auth().currentUser.uid)
-        .get()
-        .then((res) => {
-          locationData.boatName = res.data().boatName;
-          locationData.boatType = res.data().boatType;
-        })
-        .catch((err) => {
-          throw new Error(err.message);
-        });
+      try {
+        // can't be here
+        await firebase
+          .firestore()
+          .collection("userBoats")
+          .doc(firebase.auth().currentUser.uid)
+          .get()
+          .then((res) => {
+            locationData.boatName = res.data().boatName;
+            locationData.boatType = res.data().boatType;
+          })
+          .catch((err) => {
+            throw new Error(err.message);
+          });
 
-      await firebase
-        .firestore()
-        .collection("userLocations")
-        .doc(firebase.auth().currentUser.uid)
-        .set(locationData, { merge: true })
-        .catch((error) => {
-          throw new Error("Error adding document: ", error);
-        });
-    } catch (err) {
-      Alert.alert(err.message);
+        await firebase
+          .firestore()
+          .collection("userLocations")
+          .doc(firebase.auth().currentUser.uid)
+          .set(locationData, { merge: true })
+          .catch((error) => {
+            throw new Error("Error adding document: ", error);
+          });
+      } catch (err) {
+        Alert.alert(err.message);
+      }
+      setLocationState(true)
     }
-    setLocationState(true)
   }
 
   const getUserLocation = async () => {
@@ -181,7 +176,7 @@ const MainScreen = () => {
         timeInterval: 5000
       },
       (_location) => {
-        // correct data structure could be set here
+        setUserSpeed(_location.coords.speed)
         setLocation(_location)
         updateUserLocation(_location)
       }
@@ -217,7 +212,7 @@ const MainScreen = () => {
               })
           }
         },
-        { text: 'Cancel', onPress: () => setRescueMarkers([]), style: 'cancel' }
+        { text: 'Cancel', style: 'cancel' }
       ],
       { cancelable: true }
     )
@@ -230,7 +225,9 @@ const MainScreen = () => {
         .doc(firebase.auth().currentUser.uid)
         .update({
           rescued: true,
+          rescueAccepted: false,
         })
+      setNeedsRescue(false)
       setIsSendingSosAlert(false)
     } else if (option == 'cancel') {
       firebase.firestore()
@@ -242,6 +239,7 @@ const MainScreen = () => {
         }).catch(function (error) {
           console.error("Error removing SOS document: ", error);
         })
+      setNeedsRescue(false)
       setIsSendingSosAlert(false)
     }
     console.log('SOS alert updated:', option)
@@ -273,6 +271,8 @@ const MainScreen = () => {
         }).catch((error) => {
           console.error('Error adding SOS document: ', error)
         })
+
+      setNeedsRescue(true)
       sosAlert()
       setIsSendingSosAlert(true)
     } else {
@@ -293,7 +293,6 @@ const MainScreen = () => {
         })
         if (array.length) {
           receiveSosAlert(array)
-          setRescueMarkers(array)
         }
       })
     }
@@ -337,88 +336,117 @@ const MainScreen = () => {
   }, [locationState]);
 
   useEffect(() => {
+    updateUserLocation(location);
+  }, [needsRescue]);
+
+  useEffect(() => {
     getShipMarkers();
   }, [shipLocations, shipMetadata]);
 
   return (
-    <Container style={containerStyle}>
-      <MapView
-        style={{ flex: 1 }}
-        initialRegion={{
-          latitude: 60.1587262,
-          longitude: 24.922834,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        }}
-        provider={PROVIDER_GOOGLE}
-        customMapStyle={ isDarkTheme ? mapStyleDark : mapStyleLight }
-        showsUserLocation={true}
-        followsUserLocation={true}
-        showsMyLocationButton={true}
-      >
-        {shipMarkers.map((res, i) => {
-          const currentTime = Date.now();
-          const vesselIcon =
-            res.shipType > 60
-              ? require("../../assets/cargoshipicon.png")
-              : require("../../assets/boaticon.png");
-          return (
-            <Marker
-              key={i}
-              coordinate={{
-                latitude: res.geometry.coordinates[1],
-                longitude: res.geometry.coordinates[0],
-              }}
-              title={res.mmsi.toString()}
-              description={`${(currentTime - res.properties.timestampExternal) / 1000
-                }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
-              image={vesselIcon}
-            />
-          );
-        })}
-        {userMarkers.map((res, i) => {
-          //Get only other users markers and use one in mapview for self (showsUserLocation={true})
-          if (firebase.auth().currentUser.uid !== res.uid) {
+    <Container>
+      <View style={styles.mapContainer}>
+        <MapView
+          style={{ ...StyleSheet.absoluteFillObject }}
+          initialRegion={{
+            latitude: 60.1587262,
+            longitude: 24.922834,
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,
+          }}
+          provider={PROVIDER_GOOGLE}
+          customMapStyle={isDarkTheme ? mapStyleDark : mapStyleLight}
+          showsUserLocation={true}
+          followsUserLocation={true}
+          showsMyLocationButton={true}
+        >
+          {shipMarkers.map((res, i) => {
+            const currentTime = Date.now();
+            const vesselIcon =
+              res.shipType > 60
+                ? require("../../assets/cargoshipicon.png")
+                : require("../../assets/boaticon.png");
             return (
               <Marker
                 key={i}
                 coordinate={{
-                  latitude: res.g.geopoint.latitude,
-                  longitude: res.g.geopoint.longitude,
+                  latitude: res.geometry.coordinates[1],
+                  longitude: res.geometry.coordinates[0],
                 }}
-                title={res.username}
-                description={`type: ${res.boatType}, name: ${res.boatName
-                  }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
-                image={require("../../assets/usericon.png")}
+                title={res.mmsi.toString()}
+                description={`${(currentTime - res.properties.timestampExternal) / 1000
+                  }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
+                image={vesselIcon}
               />
             );
-          }
-        })}
-        {rescueMarkers.map((res, i) => {
-          return (
-            <Marker
-              key={i}
-              coordinate={{
-                latitude: res.g.geopoint.latitude,
-                longitude: res.g.geopoint.longitude,
-              }}
-              title={"SOS"}
-              description={`username: ${res.username}, phone`}
-            />
-          );
-        })}
-      </MapView>
-      <Fab
-        active={active}
-        direction="up"
-        containerStyle={{}}
-        style={{ backgroundColor: '#5067FF' }}
-        position="bottomRight"
-        onPress={() => sendSosAlert()}>
-        <Icon name="medkit" />
-      </Fab>
+          })}
+          {userMarkers.map((res, i) => {
+            //Get only other users markers and use one in mapview for self (showsUserLocation={true})
+            if (firebase.auth().currentUser.uid !== res.uid) {
+              const icon =
+                res.needsRescue === true
+                  ? require("../../assets/help.png")
+                  : require("../../assets/usericon.png");
+              return (
+                <Marker
+                  key={i}
+                  coordinate={{
+                    latitude: res.g.geopoint.latitude,
+                    longitude: res.g.geopoint.longitude,
+                  }}
+                  title={res.username}
+                  description={`type: ${res.boatType}, name: ${res.boatName
+                    }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
+                  image={icon}
+                />
+              );
+            }
+          })}
+        </MapView>
+        <View style={styles.speedometerContainer}>
+          <Speedometer
+            value={userSpeed * 1.943844}
+            totalValue={50}
+            showIndicator
+            size={150}
+            outerColor="#d3d3d3"
+            internalColor="#5ADFFF"
+            innerColor= "#ffffff"
+            showText
+            text={`${(userSpeed * 1.943844).toFixed(2)} knot`}
+            textStyle={{ color: '#5ADFFF', fontSize: 12}}
+            showLabels
+            labelTextStyle={{ color: 'black' }}
+            labelFormatter={number => `${number}`}
+          />
+        </View>
+        <Fab
+          active={active}
+          direction="up"
+          containerStyle={{}}
+          style={{ backgroundColor: '#5067FF' }}
+          position="bottomRight"
+          onPress={() => sendSosAlert()}>
+          <Icon name="medkit" />
+        </Fab>
+      </View>
     </Container>
   );
 };
+
+const styles = StyleSheet.create({
+
+  speedometerContainer: {
+    flexDirection: 'row',
+    marginVertical: 6,
+    backgroundColor: 'transparent',
+  },
+
+  mapContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  }
+})
 
 export default MainScreen;
