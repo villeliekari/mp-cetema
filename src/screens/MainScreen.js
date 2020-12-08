@@ -347,7 +347,7 @@ const MainScreen = () => {
     <Container>
       <View style={styles.mapContainer}>
         <MapView
-          style={{ ...StyleSheet.absoluteFillObject }}
+          style={styles.mapStyle}
           initialRegion={{
             latitude: 60.1587262,
             longitude: 24.922834,
@@ -424,7 +424,7 @@ const MainScreen = () => {
           active={active}
           direction="up"
           containerStyle={{}}
-          style={{ backgroundColor: '#5067FF', marginVertical: 15, }}
+          style={styles.fabStyle}
           position="bottomRight"
           onPress={() => sendSosAlert()}>
           <Icon name="medkit" />
@@ -435,6 +435,15 @@ const MainScreen = () => {
 };
 
 const styles = StyleSheet.create({
+
+  mapStyle: {
+    ...StyleSheet.absoluteFillObject
+  },
+
+  fabStyle: {
+    backgroundColor: '#5ADFFF',
+    marginVertical: 15, 
+  },
 
   speedometerContainer: {
     marginVertical: 15,
