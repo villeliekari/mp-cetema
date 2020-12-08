@@ -1,20 +1,20 @@
-import React, { useEffect, useState, useContext } from "react";
-import { Container, Fab, Button, View, Header, Icon } from "native-base";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert } from 'react-native';
-import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
+import React, {useEffect, useState, useContext} from "react";
+import {Container, Fab, Button, View, Header, Icon, Text, H3} from "native-base";
+import MapView, {Marker, PROVIDER_GOOGLE, Callout} from "react-native-maps";
+import {Alert} from 'react-native';
+import {mapStyleDark, mapStyleLight} from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
-import { withinRadius } from '../helpers/Utility'
+import {withinRadius} from '../helpers/Utility'
 import * as Notifications from 'expo-notifications';
 import ThemeContext from '../helpers/ThemeContext';
 
-import { useTheme } from "@react-navigation/native";
+import {useTheme} from "@react-navigation/native";
 
 import firebase from "../helpers/Firebase";
 
-const MainScreen = () => {
+const MainScreen = (props) => {
   const [location, setLocation] = useState(null);
   const [shipLocations, setShipLocations] = useState(null);
   const [shipMetadata, setShipMetadata] = useState(null);
@@ -24,10 +24,11 @@ const MainScreen = () => {
   const [locationState, setLocationState] = useState(false);
   const [active, setActive] = useState(false);
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
+  const [nauticalWarnings, setNauticalWarnings] = useState([]);
 
-  const { colors } = useTheme();
+  const {colors} = useTheme();
 
-  const { isDarkTheme } = useContext(ThemeContext)
+  const {isDarkTheme} = useContext(ThemeContext)
 
   const containerStyle = {
     backgroundColor: colors.background
@@ -61,6 +62,12 @@ const MainScreen = () => {
     }
   };
 
+  const fetchWarnings = () => {
+    fetch("https://meri.digitraffic.fi/api/v1/nautical-warnings/published")
+      .then((response) => response.json())
+      .then((data) => setNauticalWarnings(data.features));
+  };
+
   const getUserMarkers = () => {
     if (location) {
       console.log("Updating user markers...");
@@ -69,7 +76,7 @@ const MainScreen = () => {
       // .where can't be used on query because inequality isn't supported
       const filterTime = Date.now() - 3600000;
       const geocollection = GeoFirestore.collection('userLocations')
-      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100 })
+      const query = geocollection.near({center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100})
       query.onSnapshot(snap => {
         let array = []
         snap.forEach(doc => {
@@ -157,7 +164,7 @@ const MainScreen = () => {
         .firestore()
         .collection("userLocations")
         .doc(firebase.auth().currentUser.uid)
-        .set(locationData, { merge: true })
+        .set(locationData, {merge: true})
         .catch((error) => {
           throw new Error("Error adding document: ", error);
         });
@@ -169,7 +176,7 @@ const MainScreen = () => {
 
   const getUserLocation = async () => {
     console.log("Getting user location...");
-    let { status } = await Location.requestPermissionsAsync();
+    let {status} = await Location.requestPermissionsAsync();
     if (status !== "granted") {
       setErrorMsg("Permission to access location was denied");
     }
@@ -195,10 +202,10 @@ const MainScreen = () => {
       'SOS Alert',
       'People nearby will receive your alert',
       [
-        { text: 'Rescued', onPress: () => updateSosAlert('rescued') },
-        { text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel' }
+        {text: 'Rescued', onPress: () => updateSosAlert('rescued')},
+        {text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel'}
       ],
-      { cancelable: false }
+      {cancelable: false}
     );
   };
 
@@ -219,9 +226,9 @@ const MainScreen = () => {
               })
           }
         },
-        { text: 'Cancel', onPress: () => setRescueMarkers([]), style: 'cancel' }
+        {text: 'Cancel', onPress: () => setRescueMarkers([]), style: 'cancel'}
       ],
-      { cancelable: true }
+      {cancelable: true}
     )
   }
 
@@ -269,7 +276,7 @@ const MainScreen = () => {
       firebase.firestore()
         .collection('sos')
         .doc(firebase.auth().currentUser.uid)
-        .set(sosData, { merge: true })
+        .set(sosData, {merge: true})
         .then((doc) => {
           console.log('New SOS document added')
         }).catch((error) => {
@@ -285,7 +292,7 @@ const MainScreen = () => {
   const getSosAlert = () => {
     if (location) {
       const geocollection = GeoFirestore.collection('sos')
-      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 1 })
+      const query = geocollection.near({center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 1})
       query.where('rescued', '==', false).where('rescueAccepted', '==', false).onSnapshot(snap => {
         let array = []
         snap.forEach(doc => {
@@ -342,10 +349,14 @@ const MainScreen = () => {
     getShipMarkers();
   }, [shipLocations, shipMetadata]);
 
+  useEffect(() => {
+    fetchWarnings();
+  }, []);
+
   return (
     <Container style={containerStyle}>
       <MapView
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         initialRegion={{
           latitude: 60.1587262,
           longitude: 24.922834,
@@ -353,7 +364,7 @@ const MainScreen = () => {
           longitudeDelta: 0.1,
         }}
         provider={PROVIDER_GOOGLE}
-        customMapStyle={ isDarkTheme ? mapStyleDark : mapStyleLight }
+        customMapStyle={isDarkTheme ? mapStyleDark : mapStyleLight}
         showsUserLocation={true}
         followsUserLocation={true}
         showsMyLocationButton={true}
@@ -409,12 +420,34 @@ const MainScreen = () => {
             />
           );
         })}
+        {nauticalWarnings.map((res, i) => {
+          return (
+            <Marker
+              key={i}
+              coordinate={{
+                latitude: res.geometry.coordinates[1],
+                longitude: res.geometry.coordinates[0],
+              }}
+              image={require("../../assets/warning.png")}
+            >
+              <Callout
+               onPress={() =>
+                props.navigation.navigate("Nautical Warning", {
+                  res,
+                })} >
+                <H3>{(res.properties.locationEn)}</H3>
+                <Text>Nautical warning</Text>
+                <Text style={{ color: "blue" }}>Click here for more info</Text>
+              </Callout>
+            </Marker>
+          );
+        })}
       </MapView>
       <Fab
         active={active}
         direction="up"
         containerStyle={{}}
-        style={{ backgroundColor: '#5067FF' }}
+        style={{backgroundColor: '#5067FF'}}
         position="bottomRight"
         onPress={() => sendSosAlert()}>
         <Icon name="medkit" />
