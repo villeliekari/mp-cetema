@@ -51,6 +51,7 @@ const NauticalScreenSingle = (props) => {
                       longitude: nauticalWarning.geometry.coordinates[0],
                     }}
                     title={nauticalWarning.properties.locationEn}
+                    image={require("../../assets/warning.png")}
                   />
                 </MapView>
               </CardItem>

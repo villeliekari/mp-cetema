@@ -29,12 +29,12 @@ const NauticalScreen = (props) => {
   }, []);
 
   return (
-    <Container style={{backgroundColor: colors.background}}>
+    <Container>
       <Content>
           {nauticalWarnings.map((warning, i) => {
             return (
-              <Card key={i}>
-                  <CardItem style={containerStyle}>
+              <Card key={i} style={{marginLeft: 10, marginRight: 10}}>
+                  <CardItem>
                     <H3
                     style={textStyle}
                       onPress={() =>
