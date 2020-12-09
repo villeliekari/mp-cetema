@@ -358,12 +358,9 @@ const MainScreen = () => {
     clearInterval(shipInterval);
   }
 
-  const toggleShipMarkers = () => {
-    if (shipMarkersActive === true){
-      setShipMarkersActive(false);
-    } else 
-    setShipMarkersActive(true);
-  }
+  const toggleShipMarkers = () => { 
+    setShipMarkersActive (isActive => !isActive)
+    } 
 
   useEffect(() => {
     fetchData();
