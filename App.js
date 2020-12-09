@@ -2,11 +2,8 @@ import React, { useState, useEffect } from "react";
 import { LogBox } from "react-native";
 import * as Expo from "expo";
 import * as Font from "expo-font";
-import { StatusBar } from "expo-status-bar";
 import Navigation from "./src/helpers/Navigator";
 import * as Notifications from 'expo-notifications';
-import {AppearanceProvider} from 'react-native-appearance';
-import {ThemeProvider} from './src/helpers/ThemeContext';
 
 const App = () => {
   LogBox.ignoreLogs(["Setting a timer"]);
@@ -37,13 +34,7 @@ const App = () => {
 
   return (
     <>
-    <AppearanceProvider>
-      <ThemeProvider>
-        <StatusBar style="light" />
-        <Navigation  />
-      </ThemeProvider>      
-    </AppearanceProvider>
-      
+        <Navigation  />  
     </>
   );
 };
