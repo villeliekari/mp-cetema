@@ -390,6 +390,7 @@ const MainScreen = (props) => {
                 <Text>{`${Math.round((currentTime - res.properties.timestampExternal) / 1000)
                   } seconds ago`}</Text>
                 <Text>{`MMSI: ${res.mmsi.toString()}`}</Text>
+                <Text>{`Speed: ${res.properties.sog} knots / ` + `${Math.round(res.properties.sog * 1.852)} km/h`}</Text>
                 <Text style={{color: "blue"}}>Click for more info</Text>
                 <Text style={{color: "blue"}}>(opens browser)</Text>
               </Callout>
