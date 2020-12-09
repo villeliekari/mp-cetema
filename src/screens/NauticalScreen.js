@@ -20,10 +20,10 @@ const NauticalScreen = (props) => {
 
   return (
     <Container>
-      <Content ref={c => (this.component = c)}>
+      <Content>
           {nauticalWarnings.map((warning, i) => {
             return (
-              <Card key={i}>
+              <Card key={i} style={{marginLeft: 10, marginRight: 10}}>
                   <CardItem>
                     <H3
                       onPress={() =>
@@ -42,10 +42,6 @@ const NauticalScreen = (props) => {
                 </Card>
             );
           })}
-          <Button block light
-            onPress={() => this.component._root.scrollToPosition(0, 0)}>
-            <Text>Back to top</Text>
-          </Button>
       </Content>
     </Container>
   );
