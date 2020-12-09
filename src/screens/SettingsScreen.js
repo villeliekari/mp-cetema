@@ -57,12 +57,12 @@ const SettingsScreen = (props) => {
     <Container style={containerStyle}>
       <Content>
         <Card>
-          <CardItem header bordered style={{backgroundColor:colors.background}}>
+          <CardItem header bordered>
             <Text>User infromation WIP</Text>
           </CardItem>
-          <CardItem style={{backgroundColor:colors.background}}>
+          <CardItem>
             <Body>
-              <Text style={{color:colors.text}}>
+              <Text>
                 Name: {name}
                 {"\n"}
                 Email: {email}
@@ -74,7 +74,7 @@ const SettingsScreen = (props) => {
               </Text>
             </Body>
           </CardItem>
-          <CardItem style={{ justifyContent: "center", backgroundColor:colors.background }}>
+          <CardItem style={{ justifyContent: "center" }}>
             <Button
               warning
               transparent
@@ -92,13 +92,13 @@ const SettingsScreen = (props) => {
           </CardItem>
         </Card>
         <Card>
-          <CardItem header bordered style={{backgroundColor:colors.background}}>
+          <CardItem header bordered>
             <Text>App settings</Text>
           </CardItem>
-          <CardItem style={{backgroundColor:colors.background}}>
+          <CardItem>
             <TouchableRipple>
               <View>
-                <Text style={{color:colors.text}}>Toggle Dark Theme</Text>
+                <Text>Toggle Dark Theme</Text>
                 <Switch value={isDarkTheme === true} onValueChange={toggleTheme} />
               </View>
             </TouchableRipple>

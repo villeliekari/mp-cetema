@@ -13,20 +13,10 @@ import {
 } from "native-base";
 import { weatherApi } from "../helpers/WeatherApi";
 import * as Location from "expo-location";
-import { useTheme } from "@react-navigation/native";
 
 const Forecast = () => {
   const [seaObs, setSeaObs] = useState([]);
   const [weatherObs, setWeatherObs] = useState([]);
-  const { colors } = useTheme();
-
-  const containerStyle = {
-    backgroundColor: colors.background,
-  };
-
-  const textStyle = {
-    color: colors.text,
-  };
 
   const getLocAndFetch = async () => {
     console.log("Forecast user location..");
