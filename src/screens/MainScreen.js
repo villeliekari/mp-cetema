@@ -255,7 +255,28 @@ const MainScreen = () => {
     console.log('SOS alert updated:', option)
   }
 
+  const sendSosConfirm =() => {
+    Alert.alert(
+      'SOS Alert',
+      'Do you wish to send SOS Alert',
+      [
+        { text: 'Yes', onPress: () => sendSosAlert() },
+        { text: 'Cancel', onPress: () => console.log('cancel'), style: 'cancel' }
+      ],
+      { cancelable: false }
+    );
+  }
+
   const sendSosAlert = () => {
+    Alert.alert(
+      'SOS Alert',
+      'Do you wish to send SOS Alert',
+      [
+        { text: 'Yes', onPress: () => updateSosAlert('rescued') },
+        { text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel' }
+      ],
+      { cancelable: true }
+    );
     if (location) {
       const coords = {
         lat: location.coords.latitude,
@@ -450,7 +471,7 @@ const MainScreen = () => {
           containerStyle={{}}
           style={styles.fabStyle}
           position="bottomRight"
-          onPress={() => sendSosAlert()}>
+          onPress={() => sendSosConfirm()}>
           <Icon name="medkit" />
         </Fab>
       </View>
