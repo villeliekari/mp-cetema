@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from "react";
 import {Container, Fab, Button, View, Header, Icon, Text, H3} from "native-base";
 import MapView, {Marker, PROVIDER_GOOGLE, Callout} from "react-native-maps";
-import {Alert} from 'react-native';
+import {Alert, Linking} from 'react-native';
 import {mapStyleDark, mapStyleLight} from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
@@ -382,11 +382,18 @@ const MainScreen = (props) => {
                 latitude: res.geometry.coordinates[1],
                 longitude: res.geometry.coordinates[0],
               }}
-              title={res.mmsi.toString()}
-              description={`${(currentTime - res.properties.timestampExternal) / 1000
-                }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
               image={vesselIcon}
-            />
+            >
+              <Callout onPress={() => {Linking.openURL('https://www.marinetraffic.com/fi/ais/details/ships/mmsi:' + res.mmsi.toString())}}
+              >
+                <Text style={{fontWeight: "bold", justifyContent: 'center'}}>{res.name}</Text>
+                <Text>{`${Math.round((currentTime - res.properties.timestampExternal) / 1000)
+                  } seconds ago`}</Text>
+                <Text>{`MMSI: ${res.mmsi.toString()}`}</Text>
+                <Text style={{color: "blue"}}>Click for more info</Text>
+                <Text style={{color: "blue"}}>(opens browser)</Text>
+              </Callout>
+            </Marker>
           );
         })}
         {userMarkers.map((res, i) => {
@@ -399,11 +406,15 @@ const MainScreen = (props) => {
                   latitude: res.g.geopoint.latitude,
                   longitude: res.g.geopoint.longitude,
                 }}
-                title={res.username}
-                description={`type: ${res.boatType}, name: ${res.boatName
-                  }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
                 image={require("../../assets/usericon.png")}
-              />
+              >
+                <Callout>
+                  <Text style={{fontWeight: "bold", justifyContent: 'center'}}>{res.username}</Text>
+                  <Text>{`${Math.round((Date.now() - res.timestamp) / 1000)} seconds ago`}</Text>
+                  <Text>{`Name: ${res.boatName}`}</Text>
+                  <Text>{`Type: ${res.boatType}`}</Text>
+                </Callout>
+              </Marker>
             );
           }
         })}
@@ -431,13 +442,13 @@ const MainScreen = (props) => {
               image={require("../../assets/warning.png")}
             >
               <Callout
-               onPress={() =>
-                props.navigation.navigate("Nautical Warning", {
-                  res,
-                })} >
+                onPress={() =>
+                  props.navigation.navigate("Nautical Warning", {
+                    res,
+                  })} >
                 <H3>{(res.properties.locationEn)}</H3>
-                <Text>Nautical warning</Text>
-                <Text style={{ color: "blue" }}>Click here for more info</Text>
+                <Text>{res.properties.contentsEn}</Text>
+                <Text style={{fontWeight: "bold"}}>{res.properties.typeEn}</Text>
               </Callout>
             </Marker>
           );
