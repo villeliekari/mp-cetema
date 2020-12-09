@@ -143,7 +143,7 @@ const InfoScreen = (props) => {
             transparent
             onPress={() => props.navigation.navigate("Nautical Warnings")}
           >
-            <Text>Show all Nautical Warnings</Text>
+            <Text style={textStyle}>Show all Nautical Warnings</Text>
           </Button>
         </Card>
 
