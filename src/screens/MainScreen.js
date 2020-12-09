@@ -441,14 +441,16 @@ const MainScreen = (props) => {
               }}
               image={require("../../assets/warning.png")}
             >
-              <Callout
+              <Callout style={{flex: 1, width: 250, height: 200}}
                 onPress={() =>
                   props.navigation.navigate("Nautical Warning", {
                     res,
                   })} >
                 <H3>{(res.properties.locationEn)}</H3>
                 <Text>{res.properties.contentsEn}</Text>
-                <Text style={{fontWeight: "bold"}}>{res.properties.typeEn}</Text>
+                <Text style={{fontWeight: "bold"}}>{`Published: ${res.properties.publishingTime.substring(8, 10)}.`
+                  + `${res.properties.publishingTime.substring(5, 7)}.` +
+                  `${res.properties.publishingTime.substring(0, 4)}`}</Text>
               </Callout>
             </Marker>
           );
