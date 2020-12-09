@@ -2,7 +2,7 @@
 import React, {useEffect, useState, useContext} from "react";
 import {Container, Fab, Button, View, Header, Icon, Text, H3} from "native-base";
 import MapView, {Marker, PROVIDER_GOOGLE, Callout} from "react-native-maps";
-import {Alert, Linking} from 'react-native';
+import {Alert, StyleSheet, Linking} from 'react-native';
 import {mapStyleDark, mapStyleLight} from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
@@ -147,17 +147,6 @@ const MainScreen = (props) => {
         username: firebase.auth().currentUser.displayName,
         needsRescue: needsRescue
       };
-
-      await firebase
-        .firestore()
-        .collection("userLocations")
-        .doc(firebase.auth().currentUser.uid)
-        .set(locationData, {merge: true})
-        .catch((error) => {
-          throw new Error("Error adding document: ", error);
-        });
-    } catch (err) {
-      Alert.alert(err.message);
       try {
         // can't be here
         await firebase
@@ -455,19 +444,6 @@ const MainScreen = (props) => {
               </Marker>
             );
           }
-        })}
-        {rescueMarkers.map((res, i) => {
-          return (
-            <Marker
-              key={i}
-              coordinate={{
-                latitude: res.g.geopoint.latitude,
-                longitude: res.g.geopoint.longitude,
-              }}
-              title={"SOS"}
-              description={`username: ${res.username}, phone`}
-            />
-          );
         })}
         {nauticalWarnings.map((res, i) => {
           return (
