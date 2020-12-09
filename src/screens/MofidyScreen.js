@@ -14,7 +14,7 @@ import {
 } from "native-base";
 import firebase from "../helpers/Firebase";
 import { Alert } from "react-native";
-import { useTheme } from "../helpers/ThemeContext";
+import { useTheme } from "@react-navigation/native";
 
 const ModifyScreen = (props) => {
   const [currentPassword, setCurrentPassword] = useState(null);
@@ -25,7 +25,7 @@ const ModifyScreen = (props) => {
   const [boatName, setBoatName] = useState(null);
   const [boatType, setBoatType] = useState(null);
 
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   const containerStyle = {
     backgroundColor: colors.background,

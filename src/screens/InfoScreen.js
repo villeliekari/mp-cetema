@@ -7,10 +7,11 @@ import {
   CardItem,
   Container,
   Content,
-  Text
+  Text,
+  H3
 } from "native-base";
 import * as Location from "expo-location";
-import weatherApi from "../helpers/WeatherApi";
+import {weatherApi} from "../helpers/WeatherApi";
 import { useTheme } from "@react-navigation/native";
 
 const InfoScreen = (props) => {
@@ -89,19 +90,21 @@ const InfoScreen = (props) => {
           {nauticalWarnings.map((warning, i) => {
             if (i < 1) {
               return (
-                <Card key={i} >
-                  <CardItem style={containerStyle}>
-                    <Text style={textStyle}
+                <Card key={i}>
+                  <CardItem>
+                    <H3
                       onPress={() =>
                         props.navigation.navigate("Nautical Warning", {
                           warning,
-                        })
-                      }
-                    >
-                      {warning.properties.areasEn},{" "}
-                      {warning.properties.locationEn}:{" "}
-                      {warning.properties.contentsEn}
-                    </Text>
+                        })}>{warning.properties.areasEn}
+                    </H3>
+                  </CardItem>
+                  <CardItem><Text onPress={() =>
+                    props.navigation.navigate("Nautical Warning", {
+                      warning,
+                    })}>
+                    {warning.properties.locationEn}:{" "}
+                    {warning.properties.contentsEn}</Text>
                   </CardItem>
                 </Card>
               );
@@ -140,6 +143,9 @@ const InfoScreen = (props) => {
             </CardItem>
             <CardItem>
               <Text>{seaObs[0] ? `Wave direction: ${seaObs[0].waveDir}` : "Can't fetch wave direction"}</Text>
+            </CardItem>
+            <CardItem>
+              <Text>{weatherObs.precipProb  ? `Chance of rain: ${weatherObs.precipProb}%` : "Can't fetch CoR"}</Text>
             </CardItem>
             <CardItem>
               <Text>{weatherObs.visibility ? `Visibility: ${(weatherObs.visibility / 1000).toFixed(1)}km` : "Can't fetch visibility"}</Text>

@@ -10,7 +10,7 @@ const SplashScreen = () => {
       alignItems: 'center',
       height: '100%'}}>
       <Image
-        source={require('../../assets/splash.png')}
+        source={require('../../assets/icon.png')}
       />
       </View>
     )
