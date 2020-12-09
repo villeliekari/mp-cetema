@@ -95,8 +95,7 @@ const MainScreen = () => {
           if (doc.exists && doc.data().timestamp >= filterTime) {
             array.push(doc.data())
 
-            if (doc.id != firebase.auth().currentUser.uid) {
-              // set collision alert if not same uid and set radius radius in km
+            if (doc.id != firebase.auth().currentUser.uid) { // set collision alert if not same uid and set radius radius in km
               const myLocation = {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude
@@ -115,8 +114,7 @@ const MainScreen = () => {
               }
               const radius = 0.1
 
-              if (withinRadius(myLocation, otherLocation, radius)) {
-                //sendCollisionAlert()
+              if (withinRadius(myLocation, otherLocation, radius)) { // sendCollisionAlert()
                 array2.push(doc.data())
               }
             }
@@ -254,7 +252,6 @@ const MainScreen = () => {
       {
         text: 'Accept',
         onPress: () => {
-
           // update firebase doc
           firebase
             .firestore()
@@ -464,9 +461,7 @@ const MainScreen = () => {
           longitudeDelta: 0.1
         }}
           provider={PROVIDER_GOOGLE}
-          customMapStyle={isDarkTheme
-          ? mapStyleDark
-          : mapStyleLight}
+          customMapStyle={isDarkTheme ? mapStyleDark : mapStyleLight}
           showsUserLocation={true}
           followsUserLocation={true}
           showsMyLocationButton={true}>
@@ -493,7 +488,8 @@ const MainScreen = () => {
                 image={vesselIcon}/>);
             }
 
-          })}
+          })
+}
           {userMarkers.map((res, i) => {
             // Get only other users markers and use one in mapview for self
             // (showsUserLocation={true})
@@ -511,7 +507,8 @@ const MainScreen = () => {
                 description={`type: ${res.boatType}, name: ${res.boatName}, time: ${ (Date.now() - res.timestamp) / 1000}s ago`}
                 image={icon}/>);
             }
-          })}
+          })
+}
         </MapView>
         <View style={styles.speedometerContainer}>
           <Speedometer
