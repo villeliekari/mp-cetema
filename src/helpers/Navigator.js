@@ -13,7 +13,7 @@ import ModifyScreen from "../screens/MofidyScreen";
 import NauticalScreen from "../screens/NauticalScreen";
 import NauticalDetails from "../screens/NauticalScreenSingle";
 import Forecast from "../screens/Forecast";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import ThemeContext from './ThemeContext';
 import { CustomDarkTheme, CustomDefaultTheme } from '../styles/Themes';
 
@@ -100,7 +100,7 @@ const TabNavigatorScreen = () => {
         name="Map"
         component={MainStackScreen}
         options={{
-          tabBarIcon: ({color}) => (
+          tabBarIcon: ({ color }) => (
             <Icon name="md-boat" color={color} style={{ color: "#5ADFFF" }} />
           ),
         }}
@@ -109,7 +109,7 @@ const TabNavigatorScreen = () => {
         name="Info"
         component={InfoStackScreen}
         options={{
-          tabBarIcon: ({color}) => (
+          tabBarIcon: ({ color }) => (
             <Icon name="md-cloudy" color={color} style={{ color: "#5ADFFF" }} />
           ),
         }}
@@ -118,7 +118,7 @@ const TabNavigatorScreen = () => {
         name="Settings"
         component={SettingsStackScreen}
         options={{
-          tabBarIcon: ({color}) => (
+          tabBarIcon: ({ color }) => (
             <Icon name="md-menu" color={color} style={{ color: "#5ADFFF" }} />
           ),
         }}
@@ -148,21 +148,37 @@ const Navigation = () => {
     setIsLoading(false)
   });
 
+  const loadTheme = () => {
+    AsyncStorage.getItem('currentTheme').then(result => {
+      if (result === 'true') {
+        toggleTheme()
+      }
+    });
+  };
+
+  useEffect(() => {
+    loadTheme();
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.setItem('currentTheme', JSON.stringify(isDarkTheme));
+  }, [isDarkTheme]);
+
   // to avoid "React has detected a change in the order of Hooks called by Navigation."
   // splashscreen has to load right after the usecontext hook
   const loadSplashScreen = () => {
-  if (isLoading) {
-    return (
-      <SplashScreen/>
-    )
+    if (isLoading) {
+      return (
+        <SplashScreen />
+      )
+    }
   }
-}
 
   return (
     <ThemeContext.Provider value={themePreference}>
       {loadSplashScreen()}
       <NavigationContainer theme={theme}>
-      {isSigned ? ( TabNavigatorScreen() ) : ( AuthStackScreen() )}
+        {isSigned ? (TabNavigatorScreen()) : (AuthStackScreen())}
       </NavigationContainer>
     </ThemeContext.Provider>
   );
