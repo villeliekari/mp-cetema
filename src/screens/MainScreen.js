@@ -9,7 +9,9 @@ import * as geokit from 'geokit';
 import { withinRadius } from '../helpers/Utility'
 import * as Notifications from 'expo-notifications';
 import ThemeContext from '../helpers/ThemeContext';
+
 import { useTheme } from "@react-navigation/native";
+
 import firebase from "../helpers/Firebase";
 import Speedometer from 'react-native-speedometer-chart';
 

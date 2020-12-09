@@ -28,8 +28,8 @@ const NauticalScreenSingle = (props) => {
                   initialRegion={{
                     latitude: nauticalWarning.geometry.coordinates[1],
                     longitude: nauticalWarning.geometry.coordinates[0],
-                    latitudeDelta: 0.1,
-                    longitudeDelta: 0.1,
+                    latitudeDelta: 0.3,
+                    longitudeDelta: 0.3,
                   }}
                   provider={PROVIDER_GOOGLE}>
                   <Marker

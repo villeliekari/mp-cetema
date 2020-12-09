@@ -145,6 +145,9 @@ const InfoScreen = (props) => {
               <Text>{seaObs[0] ? `Wave direction: ${seaObs[0].waveDir}` : "Can't fetch wave direction"}</Text>
             </CardItem>
             <CardItem>
+              <Text>{weatherObs.precipProb  ? `Chance of rain: ${weatherObs.precipProb}%` : "Can't fetch CoR"}</Text>
+            </CardItem>
+            <CardItem>
               <Text>{weatherObs.visibility ? `Visibility: ${(weatherObs.visibility / 1000).toFixed(1)}km` : "Can't fetch visibility"}</Text>
             </CardItem>
           </Card>
