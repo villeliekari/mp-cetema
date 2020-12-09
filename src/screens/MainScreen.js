@@ -1,21 +1,22 @@
-import React, { useEffect, useState, useContext } from "react";
-import { Container, Fab, Button, View, Header, Icon, Text } from "native-base";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert, StyleSheet } from 'react-native';
-import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
+
+import React, {useEffect, useState, useContext} from "react";
+import {Container, Fab, Button, View, Header, Icon, Text, H3} from "native-base";
+import MapView, {Marker, PROVIDER_GOOGLE, Callout} from "react-native-maps";
+import {Alert, Linking} from 'react-native';
+import {mapStyleDark, mapStyleLight} from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from 'geofirestore';
 import * as geokit from 'geokit';
-import { withinRadius } from '../helpers/Utility'
+import {withinRadius} from '../helpers/Utility'
 import * as Notifications from 'expo-notifications';
 import ThemeContext from '../helpers/ThemeContext';
 
-import { useTheme } from "@react-navigation/native";
+import {useTheme} from "@react-navigation/native";
 
 import firebase from "../helpers/Firebase";
 import Speedometer from 'react-native-speedometer-chart';
 
-const MainScreen = () => {
+const MainScreen = (props) => {
   const [location, setLocation] = useState(null);
   const [shipLocations, setShipLocations] = useState(null);
   const [shipMetadata, setShipMetadata] = useState(null);
@@ -25,12 +26,13 @@ const MainScreen = () => {
   const [locationState, setLocationState] = useState(false);
   const [active, setActive] = useState(false);
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
+  const [nauticalWarnings, setNauticalWarnings] = useState([]);
+  const {colors} = useTheme();
   const [userSpeed, setUserSpeed] = useState(0);
-
   const [collisionDetected, setCollisionDetected] = useState(false);
   const [userWithinRadius, setUserWithinRadius] = useState([]);
 
-  const { isDarkTheme } = useContext(ThemeContext)
+  const {isDarkTheme} = useContext(ThemeContext)
 
   const GeoFirestore = geofirestore.initializeApp(firebase.firestore())
 
@@ -56,6 +58,12 @@ const MainScreen = () => {
     }
   };
 
+  const fetchWarnings = () => {
+    fetch("https://meri.digitraffic.fi/api/v1/nautical-warnings/published")
+      .then((response) => response.json())
+      .then((data) => setNauticalWarnings(data.features));
+  };
+
   const getUserMarkers = () => {
     if (location) {
       console.log("Updating user markers...");
@@ -64,7 +72,7 @@ const MainScreen = () => {
       // .where can't be used on query because inequality isn't supported
       const filterTime = Date.now() - 3600000;
       const geocollection = GeoFirestore.collection('userLocations')
-      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100 })
+      const query = geocollection.near({center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 100})
       query.onSnapshot(snap => {
         let array = []
         let array2 = []
@@ -140,6 +148,16 @@ const MainScreen = () => {
         needsRescue: needsRescue
       };
 
+      await firebase
+        .firestore()
+        .collection("userLocations")
+        .doc(firebase.auth().currentUser.uid)
+        .set(locationData, {merge: true})
+        .catch((error) => {
+          throw new Error("Error adding document: ", error);
+        });
+    } catch (err) {
+      Alert.alert(err.message);
       try {
         // can't be here
         await firebase
@@ -172,7 +190,7 @@ const MainScreen = () => {
 
   const getUserLocation = async () => {
     console.log("Getting user location...");
-    let { status } = await Location.requestPermissionsAsync();
+    let {status} = await Location.requestPermissionsAsync();
     if (status !== "granted") {
       setErrorMsg("Permission to access location was denied");
     }
@@ -198,10 +216,10 @@ const MainScreen = () => {
       'SOS Alert',
       'People nearby will receive your alert',
       [
-        { text: 'Rescued', onPress: () => updateSosAlert('rescued') },
-        { text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel' }
+        {text: 'Rescued', onPress: () => updateSosAlert('rescued')},
+        {text: 'Cancel', onPress: () => updateSosAlert('cancel'), style: 'cancel'}
       ],
-      { cancelable: false }
+      {cancelable: false}
     );
   };
 
@@ -224,7 +242,7 @@ const MainScreen = () => {
         },
         { text: 'Cancel', style: 'cancel' }
       ],
-      { cancelable: true }
+      {cancelable: true}
     )
   }
 
@@ -275,7 +293,7 @@ const MainScreen = () => {
       firebase.firestore()
         .collection('sos')
         .doc(firebase.auth().currentUser.uid)
-        .set(sosData, { merge: true })
+        .set(sosData, {merge: true})
         .then((doc) => {
           console.log('New SOS document added')
         }).catch((error) => {
@@ -293,7 +311,7 @@ const MainScreen = () => {
   const getSosAlert = () => {
     if (location) {
       const geocollection = GeoFirestore.collection('sos')
-      const query = geocollection.near({ center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 1 })
+      const query = geocollection.near({center: new firebase.firestore.GeoPoint(location.coords.latitude, location.coords.longitude), radius: 1})
       query.where('rescued', '==', false).where('rescueAccepted', '==', false).onSnapshot(snap => {
         let array = []
         snap.forEach(doc => {
@@ -367,8 +385,12 @@ const MainScreen = () => {
     getShipMarkers();
   }, [shipLocations, shipMetadata]);
 
+  useEffect(() => {
+    fetchWarnings();
+  }, []);
+
   return (
-    <Container>
+<Container>
       <View style={styles.mapContainer}>
         <MapView
           style={styles.mapStyle}
@@ -385,47 +407,92 @@ const MainScreen = () => {
           showsMyLocationButton={true}
         >
           {shipMarkers.map((res, i) => {
-            const currentTime = Date.now();
-            const vesselIcon =
-              res.shipType > 60
-                ? require("../../assets/cargoshipicon.png")
-                : require("../../assets/boaticon.png");
+          const currentTime = Date.now();
+          const vesselIcon =
+            res.shipType > 60
+              ? require("../../assets/cargoshipicon.png")
+              : require("../../assets/boaticon.png");
+          return (
+            <Marker
+              key={i}
+              coordinate={{
+                latitude: res.geometry.coordinates[1],
+                longitude: res.geometry.coordinates[0],
+              }}
+              image={vesselIcon}
+            >
+              <Callout onPress={() => {Linking.openURL('https://www.marinetraffic.com/fi/ais/details/ships/mmsi:' + res.mmsi.toString())}}
+              >
+                <Text style={{fontWeight: "bold", justifyContent: 'center'}}>{res.name}</Text>
+                <Text>{`${Math.round((currentTime - res.properties.timestampExternal) / 1000)
+                  } seconds ago`}</Text>
+                <Text>{`MMSI: ${res.mmsi.toString()}`}</Text>
+                <Text>{`Speed: ${res.properties.sog} knots / ` + `${Math.round(res.properties.sog * 1.852)} km/h`}</Text>
+                <Text style={{color: "blue"}}>Click for more info</Text>
+                <Text style={{color: "blue"}}>(opens browser)</Text>
+              </Callout>
+            </Marker>
+          );
+        })}
+          {userMarkers.map((res, i) => {
+          //Get only other users markers and use one in mapview for self (showsUserLocation={true})
+          if (firebase.auth().currentUser.uid !== res.uid) {
             return (
               <Marker
                 key={i}
                 coordinate={{
-                  latitude: res.geometry.coordinates[1],
-                  longitude: res.geometry.coordinates[0],
+                  latitude: res.g.geopoint.latitude,
+                  longitude: res.g.geopoint.longitude,
                 }}
-                title={res.mmsi.toString()}
-                description={`${(currentTime - res.properties.timestampExternal) / 1000
-                  }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
-                image={vesselIcon}
-              />
+                image={require("../../assets/usericon.png")}
+              >
+                <Callout>
+                  <Text style={{fontWeight: "bold", justifyContent: 'center'}}>{res.username}</Text>
+                  <Text>{`${Math.round((Date.now() - res.timestamp) / 1000)} seconds ago`}</Text>
+                  <Text>{`Name: ${res.boatName}`}</Text>
+                  <Text>{`Type: ${res.boatType}`}</Text>
+                </Callout>
+              </Marker>
             );
-          })}
-          {userMarkers.map((res, i) => {
-            //Get only other users markers and use one in mapview for self (showsUserLocation={true})
-            if (firebase.auth().currentUser.uid !== res.uid) {
-              const icon =
-                res.needsRescue === true
-                  ? require("../../assets/help.png")
-                  : require("../../assets/usericon.png");
-              return (
-                <Marker
-                  key={i}
-                  coordinate={{
-                    latitude: res.g.geopoint.latitude,
-                    longitude: res.g.geopoint.longitude,
-                  }}
-                  title={res.username}
-                  description={`type: ${res.boatType}, name: ${res.boatName
-                    }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
-                  image={icon}
-                />
-              );
-            }
-          })}
+          }
+        })}
+        {rescueMarkers.map((res, i) => {
+          return (
+            <Marker
+              key={i}
+              coordinate={{
+                latitude: res.g.geopoint.latitude,
+                longitude: res.g.geopoint.longitude,
+              }}
+              title={"SOS"}
+              description={`username: ${res.username}, phone`}
+            />
+          );
+        })}
+        {nauticalWarnings.map((res, i) => {
+          return (
+            <Marker
+              key={i}
+              coordinate={{
+                latitude: res.geometry.coordinates[1],
+                longitude: res.geometry.coordinates[0],
+              }}
+              image={require("../../assets/warning.png")}
+            >
+              <Callout style={{flex: 1, width: 250, height: 200}}
+                onPress={() =>
+                  props.navigation.navigate("Nautical Warning", {
+                    res,
+                  })} >
+                <H3>{(res.properties.locationEn)}</H3>
+                <Text>{res.properties.contentsEn}</Text>
+                <Text style={{fontWeight: "bold"}}>{`Published: ${res.properties.publishingTime.substring(8, 10)}.`
+                  + `${res.properties.publishingTime.substring(5, 7)}.` +
+                  `${res.properties.publishingTime.substring(0, 4)}`}</Text>
+              </Callout>
+            </Marker>
+          );
+        })}
         </MapView>
         <View style={styles.speedometerContainer}>
           <Speedometer
