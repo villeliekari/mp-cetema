@@ -26,6 +26,7 @@ const MainScreen = () => {
   const [active, setActive] = useState(false);
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
   const [userSpeed, setUserSpeed] = useState(0);
+  const [shipMarkersActive, setShipMarkersActive] = useState(true);
 
   const [collisionDetected, setCollisionDetected] = useState(false);
   const [userWithinRadius, setUserWithinRadius] = useState([]);
@@ -348,6 +349,22 @@ const MainScreen = () => {
     }
   }
 
+  function startInterval(){
+    const shipInterval = setInterval(()=>{
+           fetchData();
+      }, 120000);
+  }
+  function stopInterval(){
+    clearInterval(shipInterval);
+  }
+
+  const toggleShipMarkers = () => {
+    if (shipMarkersActive === true){
+      setShipMarkersActive(false);
+    } else 
+    setShipMarkersActive(true);
+  }
+
   useEffect(() => {
     fetchData();
     getUserLocation();
@@ -411,19 +428,22 @@ const MainScreen = () => {
               res.shipType > 60
                 ? isDarkTheme ? require("../../assets/cargoshipiconDark.png"): require("../../assets/cargoshipicon.png")
                 : isDarkTheme ? require("../../assets/boaticonDark.png"): require("../../assets/boaticon.png");
-            return (
-              <Marker
-                key={i}
-                coordinate={{
-                  latitude: res.geometry.coordinates[1],
-                  longitude: res.geometry.coordinates[0],
-                }}
-                title={res.mmsi.toString()}
-                description={`${(currentTime - res.properties.timestampExternal) / 1000
-                  }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
-                image={vesselIcon}
-              />
-            );
+                if (shipMarkersActive===true){
+                  return (
+                                <Marker
+                                  key={i}
+                                  coordinate={{
+                                    latitude: res.geometry.coordinates[1],
+                                    longitude: res.geometry.coordinates[0],
+                                  }}
+                                  title={res.mmsi.toString()}
+                                  description={`${(currentTime - res.properties.timestampExternal) / 1000
+                                    }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
+                                  image={vesselIcon}
+                                />
+                              );
+                }
+                  
           })}
           {userMarkers.map((res, i) => {
             //Get only other users markers and use one in mapview for self (showsUserLocation={true})
@@ -474,6 +494,26 @@ const MainScreen = () => {
           onPress={() => sendSosConfirm()}>
           <Icon name="medkit" />
         </Fab>
+        <Fab
+        active={active}
+        direction="down"
+        containerStyle={{}}
+        style={styles.fabStyle}
+        position="topLeft"
+        onPress={() => setActive(!active)}>
+        <Icon name="md-arrow-down"/>
+        <Button style={{
+          backgroundColor: '#34A34F'
+        }}
+        onPress={() => toggleShipMarkers()}>
+          <Icon name="boat"/>
+        </Button>
+        <Button style={{
+          backgroundColor: '#3B5998'
+        }}>
+          <Icon name="cloud"/>
+        </Button>
+      </Fab>
       </View>
     </Container>
   );
