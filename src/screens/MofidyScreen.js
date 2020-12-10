@@ -199,7 +199,7 @@ const ModifyScreen = (props) => {
       <Content style={containerStyle}>
         <Card style={containerStyle}>
           <CardItem header bordered style={containerStyle}>
-            <Text style={{ color: colors.text }}>Change user infromation</Text>
+            <Text style={{ color: colors.text }}>Change my infromation</Text>
           </CardItem>
           <Form style={containerStyle}>
             <Item stackedLabel>

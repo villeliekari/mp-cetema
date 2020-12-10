@@ -26,7 +26,7 @@ const SettingsScreen = (props) => {
   const [boatType, setBoatType] = useState(null);
   const [radius, setRadius] = useState(null);
   const [updateInterval, setUpdateInterval] = useState(null);
-
+  const [fetchTime, setFetchtime] = useState(null);
   const { colors } = useTheme();
 
   const containerStyle = {
@@ -59,11 +59,9 @@ const SettingsScreen = (props) => {
     };
 
     const getSavedFromAsyncStorage = async () => {
-      const savedRadius = await asyncStorage.get("@fetchRadius");
-      if (savedRadius) setRadius(savedRadius);
-
-      const savedUpdateInterval = await asyncStorage.get("@fetchInterval");
-      if (savedUpdateInterval) setUpdateInterval(savedUpdateInterval);
+      setRadius(await asyncStorage.get("@fetchRadius"));
+      setUpdateInterval(await asyncStorage.get("@fetchInterval"));
+      setFetchtime(await asyncStorage.get("@fetchTime"));
     };
 
     getSavedFromAsyncStorage();
@@ -79,7 +77,7 @@ const SettingsScreen = (props) => {
             bordered
             style={{ backgroundColor: colors.background }}
           >
-            <Text style={{ color: colors.text }}>User infromation WIP</Text>
+            <Text style={{ color: colors.text }}>My infromation</Text>
           </CardItem>
           <CardItem style={{ backgroundColor: colors.background }}>
             <Body>
@@ -154,7 +152,23 @@ const SettingsScreen = (props) => {
             </Item>
             <Item stackedLabel>
               <Label style={{ color: colors.text }}>
-                Fetch interval (minutes) Default is 2. Requires restart.
+                Fetch AIS ship information age newer than (minutes) Default is 30.
+              </Label>
+              <Input
+                style={{ color: colors.text }}
+                placeholder="Custom time for max age of AIS information"
+                value={fetchTime}
+                keyboardType="numeric"
+                onChangeText={(val) => {
+                  setFetchtime(val);
+                  asyncStorage.set("@fetchTime", val);
+                }}
+              />
+            </Item>
+            <Item stackedLabel>
+              <Label style={{ color: colors.text }}>
+                Fetch AIS ships interval (minutes) Default is 2. Requires
+                restart.
               </Label>
               <Input
                 style={{ color: colors.text }}

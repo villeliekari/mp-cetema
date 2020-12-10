@@ -50,12 +50,16 @@ const MainScreen = (props) => {
     console.log("Fetching data...");
     const success = (res) => (res.ok ? res.json() : Promise.resolve({}));
     const radius = await asyncStorage.get("@fetchRadius");
+    const time = await asyncStorage.get("@fetchTime");
+    const date = new Date();
+    date.setMinutes(date.getMinutes() - time ? time : 30);
+
     const locations = fetch(
       `https://meri.digitraffic.fi/api/v1/locations/latitude/${
         location ? location.coords.latitude : "60.1587262"
       }/longitude/${
         location ? location.coords.longitude : "24.922834"
-      }/radius/${radius ? radius : 100}/from/2020-12-08T00:00:00Z`
+      }/radius/${radius ? radius : 100}/from/${date}`
     ).then(success);
     const metadata = fetch(
       "https://meri.digitraffic.fi/api/v1/metadata/vessels"
@@ -413,7 +417,6 @@ const MainScreen = (props) => {
   useEffect(() => {
     const interval = setInterval(
       () => {
-        console.log(savedUpdateInterval);
         fetchData();
       },
       savedUpdateInterval ? savedUpdateInterval : 120000
@@ -453,8 +456,6 @@ const MainScreen = (props) => {
   }, [shipLocations, shipMetadata]);
 
   useEffect(() => {
-    console.log(new Date().getDate() - 1);
-
     getUserLocation();
     fetchData();
     fetchWarnings();
