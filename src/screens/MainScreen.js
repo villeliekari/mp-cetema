@@ -35,6 +35,7 @@ const MainScreen = (props) => {
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
   const [userSpeed, setUserSpeed] = useState(0);
   const [shipMarkersActive, setShipMarkersActive] = useState(true);
+  const [nauticalWarningsActive, setNauticalWarningsActive] = useState(true);
   const [followUserActive, setFollowUserActive] = useState(false);
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
   const [collisionDetected, setCollisionDetected] = useState(false);
@@ -87,10 +88,11 @@ const MainScreen = (props) => {
     if (location) {
       console.log("Updating user markers...");
 
-      // get user locations in 100km radius and last 1 hour
+      // get user locations in 100km radius and last 15 minutes
       // .where can't be used on query because inequality isn't supported
-      const filterTime = Date.now() - 3600000;
       const geocollection = GeoFirestore.collection("userLocations");
+
+      const filterTime = Date.now() - 900000;
       const query = geocollection.near({
         center: new firebase.firestore.GeoPoint(
           location.coords.latitude,
@@ -106,7 +108,7 @@ const MainScreen = (props) => {
             array.push(doc.data());
 
             if (doc.id != firebase.auth().currentUser.uid) {
-              // set collision alert if not same uid and set radius
+              // set collision alert if user within 200 meters
               // radius in km
               const myLocation = {
                 latitude: location.coords.latitude,
@@ -305,22 +307,6 @@ const MainScreen = (props) => {
   };
 
   const sendSosAlert = () => {
-    Alert.alert(
-      "SOS Alert",
-      "Do you wish to send SOS Alert",
-      [
-        {
-          text: "Yes",
-          onPress: () => updateSosAlert("rescued"),
-        },
-        {
-          text: "Cancel",
-          onPress: () => updateSosAlert("cancel"),
-          style: "cancel",
-        },
-      ],
-      { cancelable: true }
-    );
     if (location) {
       const coords = {
         lat: location.coords.latitude,
@@ -407,11 +393,36 @@ const MainScreen = (props) => {
   };
 
   const toggleShipMarkers = () => {
-    setShipMarkersActive((isActive) => !isActive);
+    setShipMarkersActive(isActive => !isActive);
   };
 
   const toggleFollowUser = () => {
     setFollowUserActive(!followUserActive);
+  };
+
+  const toggleNauticalWarnings = () => {
+    setNauticalWarningsActive(isActive => !isActive)
+  }
+
+  const getUserBoat = async () => {
+    await firebase
+      .firestore()
+      .collection("userBoats")
+      .doc(firebase.auth().currentUser.uid)
+      .get()
+      .then((res) => {
+        setBoatName(res.data().boatName);
+        setBoatType(res.data().boatType);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+
+  const getSavedFromAsyncStorage = async () => {
+    const savedUpdateInterval = await asyncStorage.get("@fetchInterval");
+    if (savedUpdateInterval)
+      setSavedUpdateInterval(savedUpdateInterval * 60000);
   };
 
   useEffect(() => {
@@ -440,9 +451,7 @@ const MainScreen = (props) => {
   useEffect(() => {
     if (userWithinRadius.length > 0) {
       setCollisionDetected(true);
-      console.log("setCollisionDetected(true)");
     } else {
-      console.log("setCollisionDetected(false)");
       setCollisionDetected(false);
     }
   }, [userWithinRadius]);
@@ -459,30 +468,7 @@ const MainScreen = (props) => {
     getUserLocation();
     fetchData();
     fetchWarnings();
-
-    const getUserBoat = async () => {
-      await firebase
-        .firestore()
-        .collection("userBoats")
-        .doc(firebase.auth().currentUser.uid)
-        .get()
-        .then((res) => {
-          setBoatName(res.data().boatName);
-          setBoatType(res.data().boatType);
-        })
-        .catch((err) => {
-          console.log(err.message);
-        });
-    };
-
-    const getSavedFromAsyncStorage = async () => {
-      const savedUpdateInterval = await asyncStorage.get("@fetchInterval");
-      if (savedUpdateInterval)
-        setSavedUpdateInterval(savedUpdateInterval * 60000);
-    };
-
     getSavedFromAsyncStorage();
-
     getUserBoat();
   }, []);
 
@@ -602,6 +588,7 @@ const MainScreen = (props) => {
             }
           })}
           {nauticalWarnings.map((res, i) => {
+            if (nauticalWarningsActive === true) {
             return (
               <Marker
                 key={i}
@@ -632,7 +619,7 @@ const MainScreen = (props) => {
                 </Callout>
               </Marker>
             );
-          })}
+          }})}
         </MapView>
         <View style={styles.speedometerContainer}>
           <Speedometer
@@ -659,50 +646,47 @@ const MainScreen = (props) => {
         <Fab
           active={active}
           direction="up"
-          containerStyle={{}}
-          style={styles.fabStyle}
-          position="bottomLeft"
-          onPress={() => toggleFollowUser()}
-        >
-          {followUserActive === false ? (
-            <Icon name="md-navigate" />
-          ) : (
-            <Icon color="red" name="md-close" />
-          )}
-        </Fab>
-        <Fab
-          active={active}
-          direction="ud"
-          containerStyle={{}}
+          containerStyle={{ }}
           style={styles.sosFabStyle}
           position="bottomRight"
-          onPress={() => sendSosConfirm()}
-        >
+          onPress={() => sendSosConfirm()}>
           <Icon name="medkit" />
         </Fab>
         <Fab
           active={active}
-          direction="down"
+          direction="up"
           containerStyle={{}}
           style={styles.fabStyle}
-          position="topLeft"
-          onPress={() => setActive(!active)}
-        >
-          <Icon name="md-arrow-down" />
+          position="bottomLeft"
+          onPress={() => setActive(!active)}>
+          <Icon name="md-arrow-up" />
           <Button
             style={{
               backgroundColor: "#34A34F",
+              marginBottom: 45
             }}
-            onPress={() => toggleShipMarkers()}
-          >
+            onPress={() => toggleShipMarkers()}>
             <Icon name="boat" />
           </Button>
           <Button
             style={{
               backgroundColor: "#3B5998",
+              marginBottom: 50
             }}
-          >
-            <Icon name="cloud" />
+            onPress={() => toggleNauticalWarnings()}>
+            <Icon name="warning" />
+          </Button>
+          <Button
+            style={{
+              backgroundColor: "#5ADFFF",
+              marginBottom: 55
+            }}
+            onPress={() => toggleFollowUser()}>
+              {followUserActive === false ? (
+                <Icon name="md-navigate" />
+              ) : (
+                <Icon color="red" name="md-close" />
+              )}
           </Button>
         </Fab>
       </View>
@@ -717,12 +701,12 @@ const styles = StyleSheet.create({
 
   fabStyle: {
     backgroundColor: "#5ADFFF",
-    marginVertical: 15,
+    marginVertical: 30,
   },
 
   sosFabStyle: {
     backgroundColor: "#f56042",
-    marginVertical: 15,
+    marginVertical: 30,
   },
 
   speedometerContainer: {
