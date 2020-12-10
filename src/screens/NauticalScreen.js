@@ -1,5 +1,14 @@
-import React, {useEffect, useState} from "react";
-import {Body, Card, CardItem, Container, Content, Text, Button, H3} from "native-base";
+import React, { useEffect, useState } from "react";
+import {
+  Body,
+  Card,
+  CardItem,
+  Container,
+  Content,
+  Text,
+  Button,
+  H3,
+} from "native-base";
 import { useTheme } from "@react-navigation/native";
 
 const NauticalScreen = (props) => {
@@ -29,30 +38,39 @@ const NauticalScreen = (props) => {
   }, []);
 
   return (
-    <Container style={{backgroundColor: colors.background}}>
+    <Container style={{ backgroundColor: colors.background }}>
       <Content>
-          {nauticalWarnings.map((warning, i) => {
-            return (
-              <Card key={i}>
-                  <CardItem style={containerStyle}>
-                    <H3
-                    style={textStyle}
-                      onPress={() =>
-                        props.navigation.navigate("Nautical Warning", {
-                          warning,
-                        })}>{warning.properties.areasEn}
-                    </H3>
-                  </CardItem>
-                  <CardItem style={containerStyle}><Text style={textStyle} onPress={() =>
+        {nauticalWarnings.map((warning, i) => {
+          return (
+            <Card key={i}>
+              <CardItem style={containerStyle}>
+                <H3
+                  style={textStyle}
+                  onPress={() =>
                     props.navigation.navigate("Nautical Warning", {
                       warning,
-                    })}>
-                    {warning.properties.locationEn}:{" "}
-                    {warning.properties.contentsEn}</Text>
-                  </CardItem>
-                </Card>
-            );
-          })}
+                    })
+                  }
+                >
+                  {warning.properties.areasEn}
+                </H3>
+              </CardItem>
+              <CardItem style={containerStyle}>
+                <Text
+                  style={textStyle}
+                  onPress={() =>
+                    props.navigation.navigate("Nautical Warning", {
+                      warning,
+                    })
+                  }
+                >
+                  {warning.properties.locationEn}:{" "}
+                  {warning.properties.contentsEn}
+                </Text>
+              </CardItem>
+            </Card>
+          );
+        })}
       </Content>
     </Container>
   );

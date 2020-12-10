@@ -7,12 +7,12 @@ import {
   Container,
   Content,
   Text,
-  View
+  View,
 } from "native-base";
 import firebase from "../helpers/Firebase";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { Switch, TouchableRipple } from 'react-native-paper';
-import ThemeContext from '../helpers/ThemeContext';
+import { Switch, TouchableRipple } from "react-native-paper";
+import ThemeContext from "../helpers/ThemeContext";
 
 const SettingsScreen = (props) => {
   const [name, setName] = useState(null);
@@ -30,7 +30,7 @@ const SettingsScreen = (props) => {
     color: colors.text,
   };
 
-  const { isDarkTheme, toggleTheme } = useContext(ThemeContext)
+  const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
 
   useFocusEffect(() => {
     setName(firebase.auth().currentUser.displayName);
@@ -57,12 +57,16 @@ const SettingsScreen = (props) => {
     <Container style={containerStyle}>
       <Content>
         <Card>
-          <CardItem header bordered style={{backgroundColor:colors.background}}>
+          <CardItem
+            header
+            bordered
+            style={{ backgroundColor: colors.background }}
+          >
             <Text>User infromation WIP</Text>
           </CardItem>
-          <CardItem style={{backgroundColor:colors.background}}>
+          <CardItem style={{ backgroundColor: colors.background }}>
             <Body>
-              <Text style={{color:colors.text}}>
+              <Text style={{ color: colors.text }}>
                 Name: {name}
                 {"\n"}
                 Email: {email}
@@ -74,7 +78,12 @@ const SettingsScreen = (props) => {
               </Text>
             </Body>
           </CardItem>
-          <CardItem style={{ justifyContent: "center", backgroundColor:colors.background }}>
+          <CardItem
+            style={{
+              justifyContent: "center",
+              backgroundColor: colors.background,
+            }}
+          >
             <Button
               warning
               transparent
@@ -92,14 +101,21 @@ const SettingsScreen = (props) => {
           </CardItem>
         </Card>
         <Card>
-          <CardItem header bordered style={{backgroundColor:colors.background}}>
+          <CardItem
+            header
+            bordered
+            style={{ backgroundColor: colors.background }}
+          >
             <Text>App settings</Text>
           </CardItem>
-          <CardItem style={{backgroundColor:colors.background}}>
+          <CardItem style={{ backgroundColor: colors.background }}>
             <TouchableRipple>
               <View>
-                <Text style={{color:colors.text}}>Toggle Dark Theme</Text>
-                <Switch value={isDarkTheme === true} onValueChange={toggleTheme} />
+                <Text style={{ color: colors.text }}>Toggle Dark Theme</Text>
+                <Switch
+                  value={isDarkTheme === true}
+                  onValueChange={toggleTheme}
+                />
               </View>
             </TouchableRipple>
           </CardItem>

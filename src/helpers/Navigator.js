@@ -14,9 +14,8 @@ import NauticalScreen from "../screens/NauticalScreen";
 import NauticalDetails from "../screens/NauticalScreenSingle";
 import Forecast from "../screens/Forecast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ThemeContext from './ThemeContext';
-import { CustomDarkTheme, CustomDefaultTheme } from '../styles/Themes';
-
+import ThemeContext from "./ThemeContext";
+import { CustomDarkTheme, CustomDefaultTheme } from "../styles/Themes";
 
 const AuthStack = createStackNavigator();
 
@@ -41,10 +40,11 @@ const MainStack = createStackNavigator();
 const MainStackScreen = () => {
   const { colors } = useTheme();
   return (
-    <MainStack.Navigator screenOptions={{
-      headerStyle: { backgroundColor: colors.background },
-      headerTintColor: colors.text,
-    }}
+    <MainStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.text,
+      }}
     >
       <MainStack.Screen name="Map" component={MainScreen} />
     </MainStack.Navigator>
@@ -134,23 +134,26 @@ const Navigation = () => {
   const theme = isDarkTheme ? CustomDarkTheme : CustomDefaultTheme;
 
   function toggleTheme() {
-    setIsDarkTheme(isDark => !isDark);
+    setIsDarkTheme((isDark) => !isDark);
   }
 
-  const themePreference = useMemo(() => ({
-    toggleTheme,
-    isDarkTheme,
-  }), [isDarkTheme]);
+  const themePreference = useMemo(
+    () => ({
+      toggleTheme,
+      isDarkTheme,
+    }),
+    [isDarkTheme]
+  );
 
   fb.auth().onAuthStateChanged((user) => {
     user ? setSigned(true) : setSigned(false);
-    setIsLoading(false)
+    setIsLoading(false);
   });
 
   const loadTheme = () => {
-    AsyncStorage.getItem('currentTheme').then(result => {
-      if (result === 'true') {
-        toggleTheme()
+    AsyncStorage.getItem("currentTheme").then((result) => {
+      if (result === "true") {
+        toggleTheme();
       }
     });
   };
@@ -160,24 +163,22 @@ const Navigation = () => {
   }, []);
 
   useEffect(() => {
-    AsyncStorage.setItem('currentTheme', JSON.stringify(isDarkTheme));
+    AsyncStorage.setItem("currentTheme", JSON.stringify(isDarkTheme));
   }, [isDarkTheme]);
 
   // to avoid "React has detected a change in the order of Hooks called by Navigation."
   // splashscreen has to load right after the usecontext hook
   const loadSplashScreen = () => {
     if (isLoading) {
-      return (
-        <SplashScreen />
-      )
+      return <SplashScreen />;
     }
-  }
+  };
 
   return (
     <ThemeContext.Provider value={themePreference}>
       {loadSplashScreen()}
       <NavigationContainer theme={theme}>
-        {isSigned ? (TabNavigatorScreen()) : (AuthStackScreen())}
+        {isSigned ? TabNavigatorScreen() : AuthStackScreen()}
       </NavigationContainer>
     </ThemeContext.Provider>
   );

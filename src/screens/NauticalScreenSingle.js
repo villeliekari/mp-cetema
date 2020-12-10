@@ -1,8 +1,16 @@
-import React, {useEffect, useState, useContext} from "react";
-import {Body, Card, CardItem, Container, Content, Text, H3} from "native-base";
-import MapView, {Marker, PROVIDER_GOOGLE} from "react-native-maps";
+import React, { useEffect, useState, useContext } from "react";
+import {
+  Body,
+  Card,
+  CardItem,
+  Container,
+  Content,
+  Text,
+  H3,
+} from "native-base";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useTheme } from "@react-navigation/native";
-import {mapStyleDark, mapStyleLight} from "../styles/MapStyleDark";
+import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
 
 const NauticalScreenSingle = (props) => {
   const [nauticalWarning, setNauticalWarning] = useState(null);
@@ -22,20 +30,22 @@ const NauticalScreenSingle = (props) => {
 
   return (
     <Container style={containerStyle}>
-      {nauticalWarning ?
+      {nauticalWarning ? (
         <>
           <Content>
             <Card>
-              <CardItem  style={containerStyle}>
-                <H3 style={textStyle}>{nauticalWarning.properties.areasEn}
-                </H3>
-              </CardItem>
-              <CardItem style={containerStyle}><Text style={textStyle}>
-                {nauticalWarning.properties.locationEn}:{" "}
-                {nauticalWarning.properties.contentsEn}</Text>
+              <CardItem style={containerStyle}>
+                <H3 style={textStyle}>{nauticalWarning.properties.areasEn}</H3>
               </CardItem>
               <CardItem style={containerStyle}>
-                <MapView style={{flex: 1, height: 200}}
+                <Text style={textStyle}>
+                  {nauticalWarning.properties.locationEn}:{" "}
+                  {nauticalWarning.properties.contentsEn}
+                </Text>
+              </CardItem>
+              <CardItem style={containerStyle}>
+                <MapView
+                  style={{ flex: 1, height: 200 }}
                   initialRegion={{
                     latitude: nauticalWarning.geometry.coordinates[1],
                     longitude: nauticalWarning.geometry.coordinates[0],
@@ -43,9 +53,10 @@ const NauticalScreenSingle = (props) => {
                     longitudeDelta: 0.3,
                   }}
                   customMapStyle={isDarkTheme ? mapStyleDark : mapStyleLight}
-                  provider={PROVIDER_GOOGLE}>
+                  provider={PROVIDER_GOOGLE}
+                >
                   <Marker
-                    key={'asd'}
+                    key={"asd"}
                     coordinate={{
                       latitude: nauticalWarning.geometry.coordinates[1],
                       longitude: nauticalWarning.geometry.coordinates[0],
@@ -56,7 +67,10 @@ const NauticalScreenSingle = (props) => {
               </CardItem>
             </Card>
           </Content>
-        </> : <Text>Loading</Text>}
+        </>
+      ) : (
+        <Text>Loading</Text>
+      )}
     </Container>
   );
 };
