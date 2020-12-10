@@ -52,15 +52,15 @@ const MainScreen = (props) => {
     const radius = await asyncStorage.get("@fetchRadius");
     const time = await asyncStorage.get("@fetchTime");
     const date = new Date();
-    date.setMinutes(date.getMinutes() - time ? time : 30);
+    date.setMinutes(date.getMinutes() - (time ? time : 30));
 
-    const locations = fetch(
-      `https://meri.digitraffic.fi/api/v1/locations/latitude/${
-        location ? location.coords.latitude : "60.1587262"
-      }/longitude/${
-        location ? location.coords.longitude : "24.922834"
-      }/radius/${radius ? radius : 100}/from/${date}`
-    ).then(success);
+    const url = `https://meri.digitraffic.fi/api/v1/locations/latitude/${
+      location ? location.coords.latitude : "60.1587262"
+    }/longitude/${location ? location.coords.longitude : "24.922834"}/radius/${
+      radius ? radius : 100
+    }/from/${date.toISOString()}`;
+
+    const locations = fetch(url).then(success);
     const metadata = fetch(
       "https://meri.digitraffic.fi/api/v1/metadata/vessels"
     ).then(success);
@@ -506,6 +506,7 @@ const MainScreen = (props) => {
                 }
               : null
           }
+          showsMyLocationButton={false}
           provider={PROVIDER_GOOGLE}
           customMapStyle={isDarkTheme ? mapStyleDark : mapStyleLight}
           showsUserLocation={true}
@@ -665,14 +666,14 @@ const MainScreen = (props) => {
           {followUserActive === false ? (
             <Icon name="md-navigate" />
           ) : (
-            <Icon name="md-close" />
+            <Icon color="red" name="md-close" />
           )}
         </Fab>
         <Fab
           active={active}
-          direction="up"
+          direction="ud"
           containerStyle={{}}
-          style={styles.fabStyle}
+          style={styles.sosFabStyle}
           position="bottomRight"
           onPress={() => sendSosConfirm()}
         >
@@ -715,6 +716,11 @@ const styles = StyleSheet.create({
 
   fabStyle: {
     backgroundColor: "#5ADFFF",
+    marginVertical: 15,
+  },
+
+  sosFabStyle: {
+    backgroundColor: "#f56042",
     marginVertical: 15,
   },
 

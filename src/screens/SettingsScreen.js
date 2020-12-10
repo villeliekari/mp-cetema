@@ -152,7 +152,8 @@ const SettingsScreen = (props) => {
             </Item>
             <Item stackedLabel>
               <Label style={{ color: colors.text }}>
-                Fetch AIS ship information age newer than (minutes) Default is 30.
+                Fetch AIS ship information age newer than (minutes) Default is
+                30.
               </Label>
               <Input
                 style={{ color: colors.text }}
