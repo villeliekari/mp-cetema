@@ -103,7 +103,7 @@ const Forecast = () => {
               bordered
               style={{ backgroundColor: colors.background }}
             >
-              <Text>Marine forecast at your location</Text>
+              <Text style={{ color: colors.text }}>Marine forecast at your location</Text>
             </CardItem>
           </Card>
           {seaObs.map((item, i) => {

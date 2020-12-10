@@ -109,7 +109,7 @@ const InfoScreen = (props) => {
             bordered
             style={{ backgroundColor: colors.background }}
           >
-            <Text>Nautical Warnings</Text>
+            <Text style={{ color: colors.text }}>Nautical Warnings</Text>
           </CardItem>
           {nauticalWarnings.map((warning, i) => {
             if (i <= 1) {
@@ -158,7 +158,7 @@ const InfoScreen = (props) => {
               bordered
               style={{ backgroundColor: colors.background }}
             >
-              <Text>Current Weather</Text>
+              <Text style={{ color: colors.text }}>Current Weather</Text>
             </CardItem>
             <CardItem
               header

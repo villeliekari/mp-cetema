@@ -20,6 +20,7 @@ import * as Notifications from "expo-notifications";
 import ThemeContext from "../helpers/ThemeContext";
 
 import firebase from "../helpers/Firebase";
+import asyncStorage from "../helpers/AsyncStorage";
 import Speedometer from "react-native-speedometer-chart";
 
 const MainScreen = (props) => {
@@ -40,16 +41,21 @@ const MainScreen = (props) => {
   const [userWithinRadius, setUserWithinRadius] = useState([]);
   const [boatName, setBoatName] = useState(null);
   const [boatType, setBoatType] = useState(null);
-
   const { isDarkTheme } = useContext(ThemeContext);
+  const [savedUpdateInterval, setSavedUpdateInterval] = useState(null);
 
   const GeoFirestore = geofirestore.initializeApp(firebase.firestore());
 
   const fetchData = async () => {
     console.log("Fetching data...");
     const success = (res) => (res.ok ? res.json() : Promise.resolve({}));
+    const radius = await asyncStorage.get("@fetchRadius");
     const locations = fetch(
-      "https://meri.digitraffic.fi/api/v1/locations/latest"
+      `https://meri.digitraffic.fi/api/v1/locations/latitude/${
+        location ? location.coords.latitude : "60.1587262"
+      }/longitude/${
+        location ? location.coords.longitude : "24.922834"
+      }/radius/${radius ? radius : 100}/from/2020-12-08T00:00:00Z`
     ).then(success);
     const metadata = fetch(
       "https://meri.digitraffic.fi/api/v1/metadata/vessels"
@@ -136,13 +142,10 @@ const MainScreen = (props) => {
   const getShipMarkers = () => {
     if (shipLocations && shipMetadata) {
       console.log("Updating ship markers...");
-      const filterTime = Date.now() - 60000;
-      const combinedResult = shipLocations
-        .filter((i) => i.properties.timestampExternal >= filterTime)
-        .map((locaObj) => ({
-          ...shipMetadata.find((metaObj) => metaObj.mmsi === locaObj.mmsi),
-          ...locaObj,
-        }));
+      const combinedResult = shipLocations.map((locaObj) => ({
+        ...shipMetadata.find((metaObj) => metaObj.mmsi === locaObj.mmsi),
+        ...locaObj,
+      }));
 
       setShipMarkers(combinedResult);
     }
@@ -408,11 +411,15 @@ const MainScreen = (props) => {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 120000);
+    const interval = setInterval(
+      () => {
+        console.log(savedUpdateInterval);
+        fetchData();
+      },
+      savedUpdateInterval ? savedUpdateInterval : 120000
+    );
     return () => clearInterval(interval);
-  }, []);
+  }, [savedUpdateInterval]);
 
   useEffect(() => {
     receiveUpdatesOnSosAlert();
@@ -446,7 +453,10 @@ const MainScreen = (props) => {
   }, [shipLocations, shipMetadata]);
 
   useEffect(() => {
+    console.log(new Date().getDate() - 1);
+
     getUserLocation();
+    fetchData();
     fetchWarnings();
     const getUserBoat = async () => {
       await firebase
@@ -462,6 +472,15 @@ const MainScreen = (props) => {
           console.log(err.message);
         });
     };
+
+    const getSavedFromAsyncStorage = async () => {
+      const savedUpdateInterval = await asyncStorage.get("@fetchInterval");
+      if (savedUpdateInterval)
+        setSavedUpdateInterval(savedUpdateInterval * 60000);
+    };
+
+    getSavedFromAsyncStorage();
+
     getUserBoat();
   }, []);
 

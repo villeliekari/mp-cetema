@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "native-base";
 import fb from "./Firebase";
+import AboutScreen from "../screens/About";
 import SplashScreen from "../screens/SplashScreen";
 import AuthScreen from "../screens/AuthScreen";
 import MainScreen from "../screens/MainScreen";
@@ -84,8 +85,11 @@ const SettingsStackScreen = () => {
       }}
     >
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
-      <SettingsStack.Screen name="Modify" component={ModifyScreen} />
-      <SettingsStack.Screen name="About" component={SettingsScreen} />
+      <SettingsStack.Screen
+        name="Update Information"
+        component={ModifyScreen}
+      />
+      <SettingsStack.Screen name="About" component={AboutScreen} />
     </SettingsStack.Navigator>
   );
 };
