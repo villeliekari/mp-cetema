@@ -459,6 +459,7 @@ const MainScreen = (props) => {
     getUserLocation();
     fetchData();
     fetchWarnings();
+
     const getUserBoat = async () => {
       await firebase
         .firestore()
