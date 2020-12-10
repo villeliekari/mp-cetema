@@ -6,20 +6,27 @@ import {
   CardItem,
   Container,
   Content,
+  Form,
+  Input,
+  Item,
+  Label,
   Text,
-  View
+  View,
 } from "native-base";
 import firebase from "../helpers/Firebase";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { Switch, TouchableRipple } from 'react-native-paper';
-import ThemeContext from '../helpers/ThemeContext';
+import { Switch, TouchableRipple } from "react-native-paper";
+import ThemeContext from "../helpers/ThemeContext";
+import asyncStorage from "../helpers/AsyncStorage";
 
 const SettingsScreen = (props) => {
   const [name, setName] = useState(null);
   const [email, setEmail] = useState(null);
   const [boatName, setBoatName] = useState(null);
   const [boatType, setBoatType] = useState(null);
-
+  const [radius, setRadius] = useState(null);
+  const [updateInterval, setUpdateInterval] = useState(null);
+  const [fetchTime, setFetchtime] = useState(null);
   const { colors } = useTheme();
 
   const containerStyle = {
@@ -30,7 +37,7 @@ const SettingsScreen = (props) => {
     color: colors.text,
   };
 
-  const { isDarkTheme, toggleTheme } = useContext(ThemeContext)
+  const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
 
   useFocusEffect(() => {
     setName(firebase.auth().currentUser.displayName);
@@ -50,6 +57,14 @@ const SettingsScreen = (props) => {
           console.log(err.message);
         });
     };
+
+    const getSavedFromAsyncStorage = async () => {
+      setRadius(await asyncStorage.get("@fetchRadius"));
+      setUpdateInterval(await asyncStorage.get("@fetchInterval"));
+      setFetchtime(await asyncStorage.get("@fetchTime"));
+    };
+
+    getSavedFromAsyncStorage();
     getBoatInfo();
   }, []);
 
@@ -57,12 +72,16 @@ const SettingsScreen = (props) => {
     <Container style={containerStyle}>
       <Content>
         <Card>
-          <CardItem header bordered>
-            <Text>User infromation WIP</Text>
+          <CardItem
+            header
+            bordered
+            style={{ backgroundColor: colors.background }}
+          >
+            <Text style={{ color: colors.text }}>My infromation</Text>
           </CardItem>
-          <CardItem>
+          <CardItem style={{ backgroundColor: colors.background }}>
             <Body>
-              <Text>
+              <Text style={{ color: colors.text }}>
                 Name: {name}
                 {"\n"}
                 Email: {email}
@@ -74,11 +93,16 @@ const SettingsScreen = (props) => {
               </Text>
             </Body>
           </CardItem>
-          <CardItem style={{ justifyContent: "center" }}>
+          <CardItem
+            style={{
+              justifyContent: "center",
+              backgroundColor: colors.background,
+            }}
+          >
             <Button
-              warning
+              info
               transparent
-              onPress={() => props.navigation.navigate("Modify")}
+              onPress={() => props.navigation.navigate("Update Information")}
             >
               <Text>Update information</Text>
             </Button>
@@ -92,18 +116,82 @@ const SettingsScreen = (props) => {
           </CardItem>
         </Card>
         <Card>
-          <CardItem header bordered>
-            <Text>App settings</Text>
+          <CardItem
+            header
+            bordered
+            style={{ backgroundColor: colors.background }}
+          >
+            <Text style={{ color: colors.text }}>App settings</Text>
           </CardItem>
-          <CardItem>
+          <CardItem style={{ backgroundColor: colors.background }}>
             <TouchableRipple>
-              <View>
-                <Text>Toggle Dark Theme</Text>
-                <Switch value={isDarkTheme === true} onValueChange={toggleTheme} />
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ color: colors.text, paddingTop: 2, paddingRight: "3%" }}>Toggle Dark Theme</Text>
+                <Switch
+                  value={isDarkTheme === true}
+                  onValueChange={toggleTheme}
+                />
               </View>
             </TouchableRipple>
           </CardItem>
+          <Form style={{ backgroundColor: colors.background }}>
+            <Item stackedLabel>
+              <Label style={{ color: colors.text }}>
+                Fetch radius (kilometers) Default is 100.
+              </Label>
+              <Input
+                style={{ color: colors.text }}
+                placeholder="Custom radius for AIS ships."
+                value={radius}
+                keyboardType="numeric"
+                onChangeText={(val) => {
+                  setRadius(val);
+                  asyncStorage.set("@fetchRadius", val);
+                }}
+              />
+            </Item>
+            <Item stackedLabel>
+              <Label style={{ color: colors.text }}>
+                Fetch AIS ship information age newer than (minutes) Default is
+                30.
+              </Label>
+              <Input
+                style={{ color: colors.text }}
+                placeholder="Custom time for max age of AIS information"
+                value={fetchTime}
+                keyboardType="numeric"
+                onChangeText={(val) => {
+                  setFetchtime(val);
+                  asyncStorage.set("@fetchTime", val);
+                }}
+              />
+            </Item>
+            <Item stackedLabel>
+              <Label style={{ color: colors.text }}>
+                Fetch AIS ships interval (minutes) Default is 2. Requires
+                restart.
+              </Label>
+              <Input
+                style={{ color: colors.text }}
+                placeholder="Custom interval to update AIS ships."
+                value={updateInterval}
+                keyboardType="numeric"
+                onChangeText={(val) => {
+                  setUpdateInterval(val);
+                  asyncStorage.set("@fetchInterval", val);
+                }}
+              />
+            </Item>
+          </Form>
         </Card>
+        <Button
+          info
+          transparent
+          block
+          onPress={() => props.navigation.navigate("About")}
+        >
+          <Text>About</Text>
+        </Button>
       </Content>
     </Container>
   );

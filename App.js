@@ -3,7 +3,7 @@ import { LogBox } from "react-native";
 import * as Expo from "expo";
 import * as Font from "expo-font";
 import Navigation from "./src/helpers/Navigator";
-import * as Notifications from 'expo-notifications';
+import * as Notifications from "expo-notifications";
 
 const App = () => {
   LogBox.ignoreLogs(["Setting a timer"]);
@@ -34,7 +34,7 @@ const App = () => {
 
   return (
     <>
-        <Navigation  />  
+      <Navigation />
     </>
   );
 };

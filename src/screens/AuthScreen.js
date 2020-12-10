@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Body,
   Button,
   Card,
   Container,
@@ -14,6 +13,7 @@ import {
 import { Alert } from "react-native";
 import firebase from "../helpers/Firebase";
 import asyncStorage from "../helpers/AsyncStorage";
+import { useTheme } from "@react-navigation/native";
 
 const AuthScreen = () => {
   const [name, setName] = useState(null);
@@ -23,6 +23,16 @@ const AuthScreen = () => {
   const [hasAccount, switchForm] = useState(false);
   const [boatName, setBoatName] = useState(null);
   const [boatType, setBoatType] = useState(null);
+
+  const { colors } = useTheme();
+
+  const containerStyle = {
+    backgroundColor: colors.background,
+  };
+
+  const textStyle = {
+    color: colors.text,
+  };
 
   const userLogin = async () => {
     if (email && password) {
@@ -108,90 +118,117 @@ const AuthScreen = () => {
   }, []);
 
   return (
-    <Container>
-      <Content>
-        <Card>
+    <Container style={containerStyle}>
+      <Content style={containerStyle}>
+        <Card style={containerStyle}>
           {!hasAccount ? (
-            <Form>
+            <Form style={containerStyle}>
               <Item stackedLabel>
-                <Label>Email</Label>
+                <Label style={{ color: colors.text }}>Email</Label>
                 <Input
+                  style={{ color: colors.text }}
                   autoCapitalize="none"
                   value={email}
                   onChangeText={(val) => setEmail(val)}
                 />
               </Item>
               <Item stackedLabel>
-                <Label>Password</Label>
+                <Label style={{ color: colors.text }}>Password</Label>
                 <Input
+                  style={{ color: colors.text }}
                   value={password}
                   onChangeText={(val) => setPassword(val)}
                   secureTextEntry
                 />
               </Item>
               <Button
+                success
+                transparent
+                block
                 style={{ alignSelf: "center", margin: 10 }}
                 onPress={() => userLogin()}
               >
                 <Text>Login</Text>
               </Button>
 
-              <Button transparent onPress={() => switchForm(!hasAccount)}>
+              <Button
+                info
+                transparent
+                block
+                onPress={() => switchForm(!hasAccount)}
+              >
                 <Text>Don't have account? Click here to SignUp</Text>
               </Button>
             </Form>
           ) : (
-            <Form>
+            <Form style={containerStyle}>
               <Item stackedLabel>
-                <Label>Name</Label>
-                <Input value={name} onChangeText={(val) => setName(val)} />
+                <Label style={{ color: colors.text }}>Name</Label>
+                <Input
+                  style={{ color: colors.text }}
+                  value={name}
+                  onChangeText={(val) => setName(val)}
+                />
               </Item>
               <Item stackedLabel>
-                <Label>Email</Label>
+                <Label style={{ color: colors.text }}>Email</Label>
                 <Input
+                  style={{ color: colors.text }}
                   autoCapitalize="none"
                   value={email}
                   onChangeText={(val) => setEmail(val)}
                 />
               </Item>
               <Item stackedLabel>
-                <Label>Boat name</Label>
+                <Label style={{ color: colors.text }}>Boat name</Label>
                 <Input
+                  style={{ color: colors.text }}
                   value={boatName}
                   onChangeText={(val) => setBoatName(val)}
                 />
               </Item>
               <Item stackedLabel>
-                <Label>Boat type</Label>
+                <Label style={{ color: colors.text }}>Boat type</Label>
                 <Input
+                  style={{ color: colors.text }}
                   value={boatType}
                   onChangeText={(val) => setBoatType(val)}
                 />
               </Item>
               <Item stackedLabel>
-                <Label>Password</Label>
+                <Label style={{ color: colors.text }}>Password</Label>
                 <Input
+                  style={{ color: colors.text }}
                   value={password}
                   onChangeText={(val) => setPassword(val)}
                   secureTextEntry
                 />
               </Item>
               <Item stackedLabel>
-                <Label>Confirm Password</Label>
+                <Label style={{ color: colors.text }}>Confirm Password</Label>
                 <Input
+                  style={{ color: colors.text }}
                   value={confirmPassword}
                   onChangeText={(val) => setConfirmPassword(val)}
                   secureTextEntry
                 />
               </Item>
               <Button
+                success
+                transparent
+                block
                 style={{ alignSelf: "center", margin: 10 }}
                 onPress={() => userRegister()}
               >
                 <Text>Register</Text>
               </Button>
 
-              <Button transparent onPress={() => switchForm(!hasAccount)}>
+              <Button
+                info
+                transparent
+                block
+                onPress={() => switchForm(!hasAccount)}
+              >
                 <Text>Have account already? Click here to SignIn</Text>
               </Button>
             </Form>
