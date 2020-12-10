@@ -23,7 +23,7 @@ export const CustomDarkTheme = {
     primary: "#fff",
     background: "#333",
     text: "#fff",
-    //card: '',
+    card: "#333",
     //border: '',
     //notification: '',
   },

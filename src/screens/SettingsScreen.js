@@ -125,8 +125,8 @@ const SettingsScreen = (props) => {
           </CardItem>
           <CardItem style={{ backgroundColor: colors.background }}>
             <TouchableRipple>
-              <View>
-                <Text style={{ color: colors.text }}>Toggle Dark Theme</Text>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ color: colors.text, paddingTop: 2, paddingRight: "3%" }}>Toggle Dark Theme</Text>
                 <Switch
                   value={isDarkTheme === true}
                   onValueChange={toggleTheme}
