@@ -103,16 +103,21 @@ const InfoScreen = (props) => {
   return (
     <Container style={containerStyle}>
       <Content>
-        <Card>
-          <CardItem header bordered>
+        <Card style={containerStyle}>
+          <CardItem
+            header
+            bordered
+            style={{ backgroundColor: colors.background }}
+          >
             <Text>Nautical Warnings</Text>
           </CardItem>
           {nauticalWarnings.map((warning, i) => {
             if (i <= 1) {
               return (
-                <Card key={i} style={{ marginLeft: 10, marginRight: 10 }}>
-                  <CardItem>
+                <Card key={i}>
+                  <CardItem style={{ backgroundColor: colors.background }}>
                     <H3
+                      style={textStyle}
                       onPress={() =>
                         props.navigation.navigate("Nautical Warning", {
                           warning,
@@ -122,8 +127,9 @@ const InfoScreen = (props) => {
                       {warning.properties.areasEn}
                     </H3>
                   </CardItem>
-                  <CardItem>
+                  <CardItem style={{ backgroundColor: colors.background }}>
                     <Text
+                      style={textStyle}
                       onPress={() =>
                         props.navigation.navigate("Nautical Warning", {
                           warning,
@@ -140,103 +146,109 @@ const InfoScreen = (props) => {
           })}
           <Button
             block
+            info
             transparent
             onPress={() => props.navigation.navigate("Nautical Warnings")}
           >
             <Text>Show all Nautical Warnings</Text>
           </Button>
-        </Card>
-
-        <Card>
-          <CardItem header bordered>
-            <Text>Weather</Text>
-          </CardItem>
-          <CardItem
-            header
-            button
-            onPress={() => props.navigation.navigate("Forecast")}
-          >
-            <Text style={{ fontWeight: "bold" }}>
-              Sea state at your location:{" "}
-            </Text>
-          </CardItem>
-          <CardItem
-            button
-            onPress={() => props.navigation.navigate("Forecast")}
-          >
-            <Image
-              source={{
-                uri:
-                  "https://developer.foreca.com/static/images/symbols_pastel/" +
-                  weatherObs.symbol +
-                  ".png",
-              }}
-              style={{
-                flex: 1,
-                aspectRatio: 4,
-                resizeMode: "contain",
-              }}
-            />
-          </CardItem>
-          <CardItem>
-            <Text>
-              {weatherObs.temperature
-                ? `Air temperature: ${weatherObs.temperature}°C`
-                : "Can't fetch air temp"}
-            </Text>
-            <Text>
-              {weatherObs.symbolPhrase
-                ? `,  ${weatherObs.symbolPhrase}`
-                : "Can't fetch string"}
-            </Text>
-          </CardItem>
-          <CardItem>
-            <Text>
-              {seaObs[0]
-                ? `Seawater temperature: ${seaObs[0].seaTemp}°C`
-                : "Can't fetch temperature"}
-            </Text>
-          </CardItem>
-          <CardItem>
-            <Text>
-              {weatherObs.windSpeed
-                ? `Wind: ${weatherObs.windSpeed}m/s`
-                : "Can't fetch wind speed"}
-            </Text>
-            <Text>
-              {weatherObs.windDirString
-                ? ` ${weatherObs.windDirString}`
-                : "Can't fetch wind dir"}
-            </Text>
-          </CardItem>
-          <CardItem>
-            <Text>
-              {seaObs[0]
-                ? `Wave height: ${seaObs[0].sigWaveHeight}m`
-                : "Can't fetch wave height"}
-            </Text>
-          </CardItem>
-          <CardItem>
-            <Text>
-              {seaObs[0]
-                ? `Wave direction: ${seaObs[0].waveDir}`
-                : "Can't fetch wave direction"}
-            </Text>
-          </CardItem>
-          <CardItem>
-            <Text>
-              {weatherObs.precipProb
-                ? `Chance of rain: ${weatherObs.precipProb}%`
-                : "Can't fetch CoR"}
-            </Text>
-          </CardItem>
-          <CardItem>
-            <Text>
-              {weatherObs.visibility
-                ? `Visibility: ${(weatherObs.visibility / 1000).toFixed(1)}km`
-                : "Can't fetch visibility"}
-            </Text>
-          </CardItem>
+          <Card style={containerStyle}>
+            <CardItem
+              header
+              bordered
+              style={{ backgroundColor: colors.background }}
+            >
+              <Text>Current Weather</Text>
+            </CardItem>
+            <CardItem
+              header
+              button
+              style={{ backgroundColor: colors.background }}
+              onPress={() => props.navigation.navigate("Forecast")}
+            >
+              <Text style={{ fontWeight: "bold", color: colors.text }}>
+                Sea state at your location:{" "}
+              </Text>
+            </CardItem>
+            <CardItem
+              button
+              style={{ backgroundColor: colors.background }}
+              onPress={() => props.navigation.navigate("Forecast")}
+            >
+              <Image
+                source={{
+                  uri:
+                    "https://developer.foreca.com/static/images/symbols_pastel/" +
+                    weatherObs.symbol +
+                    ".png",
+                }}
+                style={{
+                  flex: 1,
+                  aspectRatio: 4,
+                  resizeMode: "contain",
+                }}
+              />
+            </CardItem>
+            <CardItem style={{ backgroundColor: colors.background }}>
+              <Text style={textStyle}>
+                {weatherObs.temperature
+                  ? `Air temperature: ${weatherObs.temperature}°C`
+                  : "Can't fetch air temp"}
+              </Text>
+              <Text style={textStyle}>
+                {weatherObs.symbolPhrase
+                  ? `,  ${weatherObs.symbolPhrase}`
+                  : "Can't fetch string"}
+              </Text>
+            </CardItem>
+            <CardItem style={{ backgroundColor: colors.background }}>
+              <Text style={textStyle}>
+                {seaObs[0]
+                  ? `Seawater temperature: ${seaObs[0].seaTemp}°C`
+                  : "Can't fetch temperature"}
+              </Text>
+            </CardItem>
+            <CardItem style={{ backgroundColor: colors.background }}>
+              <Text style={textStyle}>
+                {weatherObs.windSpeed
+                  ? `Wind: ${weatherObs.windSpeed}m/s`
+                  : "Can't fetch wind speed"}
+              </Text>
+              <Text style={textStyle}>
+                {weatherObs.windDirString
+                  ? ` ${weatherObs.windDirString}`
+                  : "Can't fetch wind dir"}
+              </Text>
+            </CardItem>
+            <CardItem style={{ backgroundColor: colors.background }}>
+              <Text style={textStyle}>
+                {seaObs[0]
+                  ? `Wave height: ${seaObs[0].sigWaveHeight}m`
+                  : "Can't fetch wave height"}
+              </Text>
+            </CardItem>
+            <CardItem style={{ backgroundColor: colors.background }}>
+              <Text style={textStyle}>
+                {seaObs[0]
+                  ? `Wave direction: ${seaObs[0].waveDir}`
+                  : "Can't fetch wave direction"}
+              </Text>
+            </CardItem>
+            <CardItem style={{ backgroundColor: colors.background }}>
+              <Text style={textStyle}>
+                {weatherObs.precipProb
+                  ? `Chance of rain: ${weatherObs.precipProb}%`
+                  : "Can't fetch CoR"}
+              </Text>
+            </CardItem>
+            <CardItem style={{ backgroundColor: colors.background }}>
+              <Text style={textStyle}>
+                {weatherObs.visibility
+                  ? `Visibility: ${(weatherObs.visibility / 1000).toFixed(1)}km`
+                  : "Can't fetch visibility"}
+              </Text>
+            </CardItem>
+          </Card>
         </Card>
       </Content>
     </Container>

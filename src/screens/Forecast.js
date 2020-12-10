@@ -13,10 +13,21 @@ import {
 } from "native-base";
 import { weatherApi } from "../helpers/WeatherApi";
 import * as Location from "expo-location";
+import { useTheme } from "@react-navigation/native";
 
 const Forecast = () => {
   const [seaObs, setSeaObs] = useState([]);
   const [weatherObs, setWeatherObs] = useState([]);
+
+  const { colors } = useTheme();
+
+  const containerStyle = {
+    backgroundColor: colors.background,
+  };
+
+  const textStyle = {
+    color: colors.text,
+  };
 
   const getLocAndFetch = async () => {
     console.log("Forecast user location..");
@@ -83,57 +94,61 @@ const Forecast = () => {
   }, []);
 
   return (
-    <Container>
-      <Content>
-        {seaObs ? (
-          <Card>
-            <CardItem header bordered>
-              <Text>Marine forecast</Text>
+    <Container style={containerStyle}>
+      {seaObs ? (
+        <Content>
+          <Card style={containerStyle}>
+            <CardItem
+              header
+              bordered
+              style={{ backgroundColor: colors.background }}
+            >
+              <Text>Marine forecast at your location</Text>
             </CardItem>
-            {seaObs.map((item, i) => {
-              return (
-                <Card key={i} style={{marginLeft: 10, marginRight: 10}}>
-                  <CardItem>
-                    <H3>
-                      {item.time
-                        ? `${item.time.substring(0, 10)}`
-                        : "Can't fetch time"}
-                    </H3>
-                    <H3>
-                      {item.time
-                        ? ` ${item.time.substring(11, 16)}`
-                        : "Can't fetch time"}
-                    </H3>
-                  </CardItem>
-                  <CardItem>
-                    <Text>
-                      {item.seaTemp
-                        ? `Seawater temperature: ${item.seaTemp}°C`
-                        : "Can't fetch temp"}
-                    </Text>
-                  </CardItem>
-                  <CardItem>
-                    <Text>
-                      {item.sigWaveHeight
-                        ? `Wave height: ${item.sigWaveHeight}m`
-                        : "Can't fetch wave height"}
-                    </Text>
-                  </CardItem>
-                  <CardItem>
-                    <Text>
-                      {item.waveDir
-                        ? `Wave direction: ${item.waveDir}`
-                        : "Can't fetch wave dir"}
-                    </Text>
-                  </CardItem>
-                </Card>
-              );
-            })}
           </Card>
-        ) : (
-          <Text>Loading</Text>
-        )}
-      </Content>
+          {seaObs.map((item, i) => {
+            return (
+              <Card key={i}>
+                <CardItem style={containerStyle}>
+                  <H3 style={textStyle}>
+                    {item.time
+                      ? `${item.time.substring(0, 10)}`
+                      : "Can't fetch time"}
+                  </H3>
+                  <H3 style={textStyle}>
+                    {item.time
+                      ? ` ${item.time.substring(11, 16)}`
+                      : "Can't fetch time"}
+                  </H3>
+                </CardItem>
+                <CardItem style={containerStyle}>
+                  <Text style={textStyle}>
+                    {item.seaTemp
+                      ? `Seawater temperature: ${item.seaTemp}°C`
+                      : "Can't fetch temp"}
+                  </Text>
+                </CardItem>
+                <CardItem style={containerStyle}>
+                  <Text style={textStyle}>
+                    {item.sigWaveHeight
+                      ? `Wave height: ${item.sigWaveHeight}m`
+                      : "Can't fetch wave height"}
+                  </Text>
+                </CardItem>
+                <CardItem style={containerStyle}>
+                  <Text style={textStyle}>
+                    {item.waveDir
+                      ? `Wave direction: ${item.waveDir}`
+                      : "Can't fetch wave dir"}
+                  </Text>
+                </CardItem>
+              </Card>
+            );
+          })}
+        </Content>
+      ) : (
+        <Text style={textStyle}>Loading</Text>
+      )}
     </Container>
   );
 };

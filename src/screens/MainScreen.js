@@ -19,8 +19,6 @@ import { withinRadius } from "../helpers/Utility";
 import * as Notifications from "expo-notifications";
 import ThemeContext from "../helpers/ThemeContext";
 
-import { useTheme } from "@react-navigation/native";
-
 import firebase from "../helpers/Firebase";
 import Speedometer from "react-native-speedometer-chart";
 
@@ -34,11 +32,14 @@ const MainScreen = (props) => {
   const [locationState, setLocationState] = useState(false);
   const [active, setActive] = useState(false);
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
-  const [nauticalWarnings, setNauticalWarnings] = useState([]);
-  const { colors } = useTheme();
   const [userSpeed, setUserSpeed] = useState(0);
+  const [shipMarkersActive, setShipMarkersActive] = useState(true);
+  const [followUserActive, setFollowUserActive] = useState(false);
+  const [nauticalWarnings, setNauticalWarnings] = useState([]);
   const [collisionDetected, setCollisionDetected] = useState(false);
   const [userWithinRadius, setUserWithinRadius] = useState([]);
+  const [boatName, setBoatName] = useState(null);
+  const [boatType, setBoatType] = useState(null);
 
   const { isDarkTheme } = useContext(ThemeContext);
 
@@ -169,22 +170,10 @@ const MainScreen = (props) => {
         uid: firebase.auth().currentUser.uid,
         username: firebase.auth().currentUser.displayName,
         needsRescue: needsRescue,
+        boatName: boatName,
+        boatType: boatType,
       };
       try {
-        // can't be here
-        await firebase
-          .firestore()
-          .collection("userBoats")
-          .doc(firebase.auth().currentUser.uid)
-          .get()
-          .then((res) => {
-            locationData.boatName = res.data().boatName;
-            locationData.boatType = res.data().boatType;
-          })
-          .catch((err) => {
-            throw new Error(err.message);
-          });
-
         await firebase
           .firestore()
           .collection("userLocations")
@@ -289,7 +278,42 @@ const MainScreen = (props) => {
     console.log("SOS alert updated:", option);
   };
 
+  const sendSosConfirm = () => {
+    Alert.alert(
+      "SOS Alert",
+      "Do you wish to send SOS Alert",
+      [
+        {
+          text: "Yes",
+          onPress: () => sendSosAlert(),
+        },
+        {
+          text: "Cancel",
+          onPress: () => console.log("cancel"),
+          style: "cancel",
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
   const sendSosAlert = () => {
+    Alert.alert(
+      "SOS Alert",
+      "Do you wish to send SOS Alert",
+      [
+        {
+          text: "Yes",
+          onPress: () => updateSosAlert("rescued"),
+        },
+        {
+          text: "Cancel",
+          onPress: () => updateSosAlert("cancel"),
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
     if (location) {
       const coords = {
         lat: location.coords.latitude,
@@ -320,7 +344,6 @@ const MainScreen = (props) => {
         .catch((error) => {
           console.error("Error adding SOS document: ", error);
         });
-
       setNeedsRescue(true);
       sosAlert();
       setIsSendingSosAlert(true);
@@ -349,96 +372,135 @@ const MainScreen = (props) => {
               array.push(doc.data());
             }
           });
+          if (array.length) {
+            receiveSosAlert(array);
+          }
         });
     }
+  };
 
-    const receiveUpdatesOnSosAlert = async () => {
-      if (isSendingSosAlert == true) {
-        await firebase
-          .firestore()
-          .collection("sos")
-          .doc(firebase.auth().currentUser.uid)
-          .onSnapshot((snap) => {
-            if (snap.exists && snap.data().rescueAccepted == true) {
-              Notifications.scheduleNotificationAsync({
-                content: {
-                  title: "SOS UPDATE!",
-                  body: "Someone is on its way to help you!",
-                },
-                trigger: null,
-              });
-            }
-          });
-      }
-    };
+  const receiveUpdatesOnSosAlert = async () => {
+    if (isSendingSosAlert == true) {
+      await firebase
+        .firestore()
+        .collection("sos")
+        .doc(firebase.auth().currentUser.uid)
+        .onSnapshot((snap) => {
+          if (snap.exists && snap.data().rescueAccepted == true) {
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: "SOS UPDATE!",
+                body: "Someone is on its way to help you!",
+              },
+              trigger: null,
+            });
+          }
+        });
+    }
+  };
 
-    useEffect(() => {
+  const toggleShipMarkers = () => {
+    setShipMarkersActive((isActive) => !isActive);
+  };
+
+  const toggleFollowUser = () => {
+    setFollowUserActive(!followUserActive);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
       fetchData();
-      getUserLocation();
-      const interval = setInterval(() => {
-        fetchData();
-      }, 120000);
-      return () => clearInterval(interval);
-    }, []);
+    }, 120000);
+    return () => clearInterval(interval);
+  }, []);
 
-    useEffect(() => {
-      receiveUpdatesOnSosAlert();
-    }, [isSendingSosAlert]);
+  useEffect(() => {
+    receiveUpdatesOnSosAlert();
+  }, [isSendingSosAlert]);
 
-    useEffect(() => {
-      getSosAlert();
-      getUserMarkers();
-    }, [locationState]);
+  useEffect(() => {
+    getSosAlert();
+    getUserMarkers();
+  }, [locationState]);
 
-    useEffect(() => {
-      updateUserLocation(location);
-    }, [needsRescue]);
+  useEffect(() => {
+    updateUserLocation(location);
+  }, [needsRescue]);
 
-    useEffect(() => {
-      if (userWithinRadius.length > 0) {
-        setCollisionDetected(true);
-        console.log("setCollisionDetected(true)");
-      } else {
-        console.log("setCollisionDetected(false)");
-        setCollisionDetected(false);
-      }
-    }, [userWithinRadius]);
+  useEffect(() => {
+    if (userWithinRadius.length > 0) {
+      setCollisionDetected(true);
+      console.log("setCollisionDetected(true)");
+    } else {
+      console.log("setCollisionDetected(false)");
+      setCollisionDetected(false);
+    }
+  }, [userWithinRadius]);
 
-    useEffect(() => {
-      sendCollisionAlert();
-    }, [collisionDetected]);
+  useEffect(() => {
+    sendCollisionAlert();
+  }, [collisionDetected]);
 
-    useEffect(() => {
-      getShipMarkers();
-    }, [shipLocations, shipMetadata]);
+  useEffect(() => {
+    getShipMarkers();
+  }, [shipLocations, shipMetadata]);
 
-    useEffect(() => {
-      fetchWarnings();
-    }, []);
+  useEffect(() => {
+    getUserLocation();
+    fetchWarnings();
+    const getUserBoat = async () => {
+      await firebase
+        .firestore()
+        .collection("userBoats")
+        .doc(firebase.auth().currentUser.uid)
+        .get()
+        .then((res) => {
+          setBoatName(res.data().boatName);
+          setBoatType(res.data().boatType);
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    };
+    getUserBoat();
+  }, []);
 
-    return (
-      <Container>
-        <View style={styles.mapContainer}>
-          <MapView
-            style={styles.mapStyle}
-            initialRegion={{
-              latitude: 60.1587262,
-              longitude: 24.922834,
-              latitudeDelta: 0.1,
-              longitudeDelta: 0.1,
-            }}
-            provider={PROVIDER_GOOGLE}
-            customMapStyle={isDarkTheme ? mapStyleDark : mapStyleLight}
-            showsUserLocation={true}
-            followsUserLocation={true}
-            showsMyLocationButton={true}
-          >
-            {shipMarkers.map((res, i) => {
-              const currentTime = Date.now();
-              const vesselIcon =
-                res.shipType > 60
-                  ? require("../../assets/cargoshipicon.png")
-                  : require("../../assets/boaticon.png");
+  return (
+    <Container>
+      <View style={styles.mapContainer}>
+        <MapView
+          style={styles.mapStyle}
+          initialRegion={{
+            latitude: 60.1587262,
+            longitude: 24.922834,
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,
+          }}
+          region={
+            followUserActive === true
+              ? {
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  latitudeDelta: 0.02,
+                  longitudeDelta: 0.02,
+                }
+              : null
+          }
+          provider={PROVIDER_GOOGLE}
+          customMapStyle={isDarkTheme ? mapStyleDark : mapStyleLight}
+          showsUserLocation={true}
+        >
+          {shipMarkers.map((res, i) => {
+            const currentTime = Date.now();
+            const vesselIcon =
+              res.shipType > 60
+                ? isDarkTheme
+                  ? require("../../assets/cargoshipiconDark.png")
+                  : require("../../assets/cargoshipicon.png")
+                : isDarkTheme
+                ? require("../../assets/boaticonDark.png")
+                : require("../../assets/boaticon.png");
+            if (shipMarkersActive === true) {
               return (
                 <Marker
                   key={i}
@@ -446,6 +508,10 @@ const MainScreen = (props) => {
                     latitude: res.geometry.coordinates[1],
                     longitude: res.geometry.coordinates[0],
                   }}
+                  title={res.mmsi.toString()}
+                  description={`${
+                    (currentTime - res.properties.timestampExternal) / 1000
+                  }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
                   image={vesselIcon}
                 >
                   <Callout
@@ -474,99 +540,152 @@ const MainScreen = (props) => {
                   </Callout>
                 </Marker>
               );
-            })}
-            {userMarkers.map((res, i) => {
-              //Get only other users markers and use one in mapview for self (showsUserLocation={true})
-              if (firebase.auth().currentUser.uid !== res.uid) {
-                return (
-                  <Marker
-                    key={i}
-                    coordinate={{
-                      latitude: res.g.geopoint.latitude,
-                      longitude: res.g.geopoint.longitude,
-                    }}
-                    image={require("../../assets/usericon.png")}
-                  >
-                    <Callout>
-                      <Text
-                        style={{ fontWeight: "bold", justifyContent: "center" }}
-                      >
-                        {res.username}
-                      </Text>
-                      <Text>{`${Math.round(
-                        (Date.now() - res.timestamp) / 1000
-                      )} seconds ago`}</Text>
-                      <Text>{`Name: ${res.boatName}`}</Text>
-                      <Text>{`Type: ${res.boatType}`}</Text>
-                    </Callout>
-                  </Marker>
-                );
-              }
-            })}
-            {nauticalWarnings.map((res, i) => {
+            }
+          })}
+          {userMarkers.map((res, i) => {
+            // Get only other users markers and use one in mapview for self
+            // (showsUserLocation={true})
+            if (firebase.auth().currentUser.uid !== res.uid) {
+              const icon =
+                res.needsRescue === true
+                  ? require("../../assets/help.png")
+                  : require("../../assets/usericon.png");
               return (
                 <Marker
                   key={i}
                   coordinate={{
-                    latitude: res.geometry.coordinates[1],
-                    longitude: res.geometry.coordinates[0],
+                    latitude: res.g.geopoint.latitude,
+                    longitude: res.g.geopoint.longitude,
                   }}
-                  image={require("../../assets/warning.png")}
+                  title={res.username}
+                  description={`type: ${res.boatType}, name: ${
+                    res.boatName
+                  }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
+                  image={icon}
                 >
-                  <Callout
-                    style={{ flex: 1, width: 250, height: 200 }}
-                    onPress={() =>
-                      props.navigation.navigate("Nautical Warning", {
-                        res,
-                      })
-                    }
-                  >
-                    <H3>{res.properties.locationEn}</H3>
-                    <Text>{res.properties.contentsEn}</Text>
-                    <Text style={{ fontWeight: "bold" }}>
-                      {`Published: ${res.properties.publishingTime.substring(
-                        8,
-                        10
-                      )}.` +
-                        `${res.properties.publishingTime.substring(5, 7)}.` +
-                        `${res.properties.publishingTime.substring(0, 4)}`}
+                  <Callout>
+                    <Text
+                      style={{ fontWeight: "bold", justifyContent: "center" }}
+                    >
+                      {res.username}
                     </Text>
+                    <Text>{`${Math.round(
+                      (Date.now() - res.timestamp) / 1000
+                    )} seconds ago`}</Text>
+                    <Text>{`Name: ${res.boatName}`}</Text>
+                    <Text>{`Type: ${res.boatType}`}</Text>
                   </Callout>
                 </Marker>
               );
-            })}
-          </MapView>
-          <View style={styles.speedometerContainer}>
-            <Speedometer
-              value={userSpeed * 1.943844}
-              totalValue={50}
-              showIndicator
-              size={150}
-              outerColor="#d3d3d3"
-              internalColor="#5ADFFF"
-              innerColor="#ffffff"
-              showText
-              text={`${(userSpeed * 1.943844).toFixed(2)} knot`}
-              textStyle={{ color: "#5ADFFF", fontSize: 12 }}
-              showLabels
-              labelTextStyle={{ color: "black" }}
-              labelFormatter={(number) => `${number}`}
-            />
-          </View>
-          <Fab
-            active={active}
-            direction="up"
-            containerStyle={{}}
-            style={styles.fabStyle}
-            position="bottomRight"
-            onPress={() => sendSosAlert()}
-          >
-            <Icon name="medkit" />
-          </Fab>
+            }
+          })}
+          {nauticalWarnings.map((res, i) => {
+            return (
+              <Marker
+                key={i}
+                coordinate={{
+                  latitude: res.geometry.coordinates[1],
+                  longitude: res.geometry.coordinates[0],
+                }}
+                image={require("../../assets/warning.png")}
+              >
+                <Callout
+                  style={{ flex: 1, width: 250, height: 200 }}
+                  onPress={() =>
+                    props.navigation.navigate("Nautical Warning", {
+                      res,
+                    })
+                  }
+                >
+                  <H3>{res.properties.locationEn}</H3>
+                  <Text>{res.properties.contentsEn}</Text>
+                  <Text style={{ fontWeight: "bold" }}>
+                    {`Published: ${res.properties.publishingTime.substring(
+                      8,
+                      10
+                    )}.` +
+                      `${res.properties.publishingTime.substring(5, 7)}.` +
+                      `${res.properties.publishingTime.substring(0, 4)}`}
+                  </Text>
+                </Callout>
+              </Marker>
+            );
+          })}
+        </MapView>
+        <View style={styles.speedometerContainer}>
+          <Speedometer
+            value={userSpeed * 1.943844}
+            totalValue={50}
+            showIndicator
+            size={150}
+            outerColor="#d3d3d3"
+            internalColor="#5ADFFF"
+            innerColor="#ffffff"
+            showText
+            text={`${(userSpeed * 1.943844).toFixed(2)} knot`}
+            textStyle={{
+              color: "#5ADFFF",
+              fontSize: 12,
+            }}
+            showLabels
+            labelTextStyle={{
+              color: "black",
+            }}
+            labelFormatter={(number) => `${number}`}
+          />
         </View>
-      </Container>
-    );
-  };
+        <Fab
+          active={active}
+          direction="up"
+          containerStyle={{}}
+          style={styles.fabStyle}
+          position="bottomLeft"
+          onPress={() => toggleFollowUser()}
+        >
+          {followUserActive === false ? (
+            <Icon name="md-navigate" />
+          ) : (
+            <Icon name="md-close" />
+          )}
+        </Fab>
+        <Fab
+          active={active}
+          direction="up"
+          containerStyle={{}}
+          style={styles.fabStyle}
+          position="bottomRight"
+          onPress={() => sendSosConfirm()}
+        >
+          <Icon name="medkit" />
+        </Fab>
+        <Fab
+          active={active}
+          direction="down"
+          containerStyle={{}}
+          style={styles.fabStyle}
+          position="topLeft"
+          onPress={() => setActive(!active)}
+        >
+          <Icon name="md-arrow-down" />
+          <Button
+            style={{
+              backgroundColor: "#34A34F",
+            }}
+            onPress={() => toggleShipMarkers()}
+          >
+            <Icon name="boat" />
+          </Button>
+          <Button
+            style={{
+              backgroundColor: "#3B5998",
+            }}
+          >
+            <Icon name="cloud" />
+          </Button>
+        </Fab>
+      </View>
+    </Container>
+  );
 };
 
 const styles = StyleSheet.create({
