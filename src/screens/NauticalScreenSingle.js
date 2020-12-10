@@ -11,10 +11,13 @@ import {
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useTheme } from "@react-navigation/native";
 import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
+import ThemeContext from "../helpers/ThemeContext";
 
 const NauticalScreenSingle = (props) => {
   const [nauticalWarning, setNauticalWarning] = useState(null);
-  const { colors, isDarkTheme } = useTheme();
+  const { isDarkTheme } = useContext(ThemeContext);
+
+  const { colors } = useTheme();
 
   const containerStyle = {
     backgroundColor: colors.background,
@@ -62,6 +65,7 @@ const NauticalScreenSingle = (props) => {
                       longitude: nauticalWarning.geometry.coordinates[0],
                     }}
                     title={nauticalWarning.properties.locationEn}
+                    image={require("../../assets/warning.png")}
                   />
                 </MapView>
               </CardItem>

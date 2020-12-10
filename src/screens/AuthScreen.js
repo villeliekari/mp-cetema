@@ -14,6 +14,7 @@ import {
 import { Alert } from "react-native";
 import firebase from "../helpers/Firebase";
 import asyncStorage from "../helpers/AsyncStorage";
+import { useTheme } from "@react-navigation/native";
 
 const AuthScreen = () => {
   const [name, setName] = useState(null);
@@ -23,6 +24,16 @@ const AuthScreen = () => {
   const [hasAccount, switchForm] = useState(false);
   const [boatName, setBoatName] = useState(null);
   const [boatType, setBoatType] = useState(null);
+
+  const { colors } = useTheme();
+
+  const containerStyle = {
+    backgroundColor: colors.background,
+  };
+
+  const textStyle = {
+    color: colors.text,
+  };
 
   const userLogin = async () => {
     if (email && password) {

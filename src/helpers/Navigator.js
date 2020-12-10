@@ -47,6 +47,7 @@ const MainStackScreen = () => {
       }}
     >
       <MainStack.Screen name="Map" component={MainScreen} />
+      <MainStack.Screen name="Nautical Warning" component={NauticalDetails} />
     </MainStack.Navigator>
   );
 };

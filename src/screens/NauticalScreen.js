@@ -13,6 +13,7 @@ import { useTheme } from "@react-navigation/native";
 
 const NauticalScreen = (props) => {
   const [nauticalWarnings, setNauticalWarnings] = useState([]);
+
   const { colors } = useTheme();
 
   const containerStyle = {

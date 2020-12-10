@@ -18,6 +18,7 @@ import { useTheme } from "@react-navigation/native";
 const Forecast = () => {
   const [seaObs, setSeaObs] = useState([]);
   const [weatherObs, setWeatherObs] = useState([]);
+
   const { colors } = useTheme();
 
   const containerStyle = {
@@ -95,54 +96,56 @@ const Forecast = () => {
   return (
     <Container style={containerStyle}>
       {seaObs ? (
-        <>
-          <Content>
-            <Body>
-              <Card style={containerStyle}>
-                <H1 style={textStyle}>Marine forecast at your location</H1>
+        <Content>
+          <Card style={containerStyle}>
+            <CardItem
+              header
+              bordered
+              style={{ backgroundColor: colors.background }}
+            >
+              <Text>Marine forecast at your location</Text>
+            </CardItem>
+          </Card>
+          {seaObs.map((item, i) => {
+            return (
+              <Card key={i}>
+                <CardItem style={containerStyle}>
+                  <H3 style={textStyle}>
+                    {item.time
+                      ? `${item.time.substring(0, 10)}`
+                      : "Can't fetch time"}
+                  </H3>
+                  <H3 style={textStyle}>
+                    {item.time
+                      ? ` ${item.time.substring(11, 16)}`
+                      : "Can't fetch time"}
+                  </H3>
+                </CardItem>
+                <CardItem style={containerStyle}>
+                  <Text style={textStyle}>
+                    {item.seaTemp
+                      ? `Seawater temperature: ${item.seaTemp}°C`
+                      : "Can't fetch temp"}
+                  </Text>
+                </CardItem>
+                <CardItem style={containerStyle}>
+                  <Text style={textStyle}>
+                    {item.sigWaveHeight
+                      ? `Wave height: ${item.sigWaveHeight}m`
+                      : "Can't fetch wave height"}
+                  </Text>
+                </CardItem>
+                <CardItem style={containerStyle}>
+                  <Text style={textStyle}>
+                    {item.waveDir
+                      ? `Wave direction: ${item.waveDir}`
+                      : "Can't fetch wave dir"}
+                  </Text>
+                </CardItem>
               </Card>
-              {seaObs.map((item, i) => {
-                return (
-                  <Card key={i}>
-                    <CardItem style={containerStyle}>
-                      <H3 style={textStyle}>
-                        {item.time
-                          ? `${item.time.substring(0, 10)}`
-                          : "Can't fetch time"}
-                      </H3>
-                      <H3 style={textStyle}>
-                        {item.time
-                          ? ` ${item.time.substring(11, 16)}`
-                          : "Can't fetch time"}
-                      </H3>
-                    </CardItem>
-                    <CardItem style={containerStyle}>
-                      <Text style={textStyle}>
-                        {item.seaTemp
-                          ? `Seawater temperature: ${item.seaTemp}°C`
-                          : "Can't fetch temp"}
-                      </Text>
-                    </CardItem>
-                    <CardItem style={containerStyle}>
-                      <Text style={textStyle}>
-                        {item.sigWaveHeight
-                          ? `Wave height: ${item.sigWaveHeight}m`
-                          : "Can't fetch wave height"}
-                      </Text>
-                    </CardItem>
-                    <CardItem style={containerStyle}>
-                      <Text style={textStyle}>
-                        {item.waveDir
-                          ? `Wave direction: ${item.waveDir}`
-                          : "Can't fetch wave dir"}
-                      </Text>
-                    </CardItem>
-                  </Card>
-                );
-              })}
-            </Body>
-          </Content>
-        </>
+            );
+          })}
+        </Content>
       ) : (
         <Text style={textStyle}>Loading</Text>
       )}

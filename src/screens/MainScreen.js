@@ -1,7 +1,16 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Container, Fab, Button, View, Header, Icon, Text } from "native-base";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Alert, StyleSheet } from "react-native";
+import {
+  Container,
+  Fab,
+  Button,
+  View,
+  Header,
+  Icon,
+  Text,
+  H3,
+} from "native-base";
+import MapView, { Marker, PROVIDER_GOOGLE, Callout } from "react-native-maps";
+import { Alert, StyleSheet, Linking } from "react-native";
 import { mapStyleDark, mapStyleLight } from "../styles/MapStyleDark";
 import * as Location from "expo-location";
 import * as geofirestore from "geofirestore";
@@ -10,12 +19,10 @@ import { withinRadius } from "../helpers/Utility";
 import * as Notifications from "expo-notifications";
 import ThemeContext from "../helpers/ThemeContext";
 
-import { useTheme } from "@react-navigation/native";
-
 import firebase from "../helpers/Firebase";
 import Speedometer from "react-native-speedometer-chart";
 
-const MainScreen = () => {
+const MainScreen = (props) => {
   const [location, setLocation] = useState(null);
   const [shipLocations, setShipLocations] = useState(null);
   const [shipMetadata, setShipMetadata] = useState(null);
@@ -27,9 +34,12 @@ const MainScreen = () => {
   const [isSendingSosAlert, setIsSendingSosAlert] = useState(false);
   const [userSpeed, setUserSpeed] = useState(0);
   const [shipMarkersActive, setShipMarkersActive] = useState(true);
-
+  const [followUserActive, setFollowUserActive] = useState(false);
+  const [nauticalWarnings, setNauticalWarnings] = useState([]);
   const [collisionDetected, setCollisionDetected] = useState(false);
   const [userWithinRadius, setUserWithinRadius] = useState([]);
+  const [boatName, setBoatName] = useState(null);
+  const [boatType, setBoatType] = useState(null);
 
   const { isDarkTheme } = useContext(ThemeContext);
 
@@ -57,12 +67,18 @@ const MainScreen = () => {
     }
   };
 
+  const fetchWarnings = () => {
+    fetch("https://meri.digitraffic.fi/api/v1/nautical-warnings/published")
+      .then((response) => response.json())
+      .then((data) => setNauticalWarnings(data.features));
+  };
+
   const getUserMarkers = () => {
     if (location) {
       console.log("Updating user markers...");
 
-      // get user locations in 100km radius and last 1 hour .where can't be used on
-      // query because inequality isn't supported
+      // get user locations in 100km radius and last 1 hour
+      // .where can't be used on query because inequality isn't supported
       const filterTime = Date.now() - 3600000;
       const geocollection = GeoFirestore.collection("userLocations");
       const query = geocollection.near({
@@ -80,7 +96,8 @@ const MainScreen = () => {
             array.push(doc.data());
 
             if (doc.id != firebase.auth().currentUser.uid) {
-              // set collision alert if not same uid and set radius radius in km
+              // set collision alert if not same uid and set radius
+              // radius in km
               const myLocation = {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
@@ -92,7 +109,7 @@ const MainScreen = () => {
               const radius = 0.1;
 
               if (withinRadius(myLocation, otherLocation, radius)) {
-                // sendCollisionAlert()
+                //sendCollisionAlert()
                 array2.push(doc.data());
               }
             }
@@ -153,23 +170,10 @@ const MainScreen = () => {
         uid: firebase.auth().currentUser.uid,
         username: firebase.auth().currentUser.displayName,
         needsRescue: needsRescue,
+        boatName: boatName,
+        boatType: boatType,
       };
-
       try {
-        // can't be here
-        await firebase
-          .firestore()
-          .collection("userBoats")
-          .doc(firebase.auth().currentUser.uid)
-          .get()
-          .then((res) => {
-            locationData.boatName = res.data().boatName;
-            locationData.boatType = res.data().boatType;
-          })
-          .catch((err) => {
-            throw new Error(err.message);
-          });
-
         await firebase
           .firestore()
           .collection("userLocations")
@@ -192,8 +196,8 @@ const MainScreen = () => {
       setErrorMsg("Permission to access location was denied");
     }
 
-    // should update if location changes by 20m and every 5s but doesn't work
-    // properly, because distanceinterval overrites timeinterval, big suck
+    // should update if location changes by 20m and every 5s
+    // but doesn't work properly, because distanceinterval overrites timeinterval, big suck
     await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.BestForNavigation,
@@ -213,10 +217,7 @@ const MainScreen = () => {
       "SOS Alert",
       "People nearby will receive your alert",
       [
-        {
-          text: "Rescued",
-          onPress: () => updateSosAlert("rescued"),
-        },
+        { text: "Rescued", onPress: () => updateSosAlert("rescued") },
         {
           text: "Cancel",
           onPress: () => updateSosAlert("cancel"),
@@ -236,17 +237,12 @@ const MainScreen = () => {
           text: "Accept",
           onPress: () => {
             // update firebase doc
-            firebase
-              .firestore()
-              .collection("sos")
-              .doc(data[0].uid)
-              .update({ rescueAccepted: true });
+            firebase.firestore().collection("sos").doc(data[0].uid).update({
+              rescueAccepted: true,
+            });
           },
         },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
       ],
       { cancelable: true }
     );
@@ -258,7 +254,10 @@ const MainScreen = () => {
         .firestore()
         .collection("sos")
         .doc(firebase.auth().currentUser.uid)
-        .update({ rescued: true, rescueAccepted: false });
+        .update({
+          rescued: true,
+          rescueAccepted: false,
+        });
       setNeedsRescue(false);
       setIsSendingSosAlert(false);
     } else if (option == "cancel") {
@@ -399,13 +398,16 @@ const MainScreen = () => {
         });
     }
   };
+
   const toggleShipMarkers = () => {
     setShipMarkersActive((isActive) => !isActive);
   };
 
+  const toggleFollowUser = () => {
+    setFollowUserActive(!followUserActive);
+  };
+
   useEffect(() => {
-    fetchData();
-    getUserLocation();
     const interval = setInterval(() => {
       fetchData();
     }, 120000);
@@ -443,6 +445,26 @@ const MainScreen = () => {
     getShipMarkers();
   }, [shipLocations, shipMetadata]);
 
+  useEffect(() => {
+    getUserLocation();
+    fetchWarnings();
+    const getUserBoat = async () => {
+      await firebase
+        .firestore()
+        .collection("userBoats")
+        .doc(firebase.auth().currentUser.uid)
+        .get()
+        .then((res) => {
+          setBoatName(res.data().boatName);
+          setBoatType(res.data().boatType);
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    };
+    getUserBoat();
+  }, []);
+
   return (
     <Container>
       <View style={styles.mapContainer}>
@@ -454,11 +476,19 @@ const MainScreen = () => {
             latitudeDelta: 0.1,
             longitudeDelta: 0.1,
           }}
+          region={
+            followUserActive === true
+              ? {
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  latitudeDelta: 0.02,
+                  longitudeDelta: 0.02,
+                }
+              : null
+          }
           provider={PROVIDER_GOOGLE}
           customMapStyle={isDarkTheme ? mapStyleDark : mapStyleLight}
           showsUserLocation={true}
-          followsUserLocation={true}
-          showsMyLocationButton={true}
         >
           {shipMarkers.map((res, i) => {
             const currentTime = Date.now();
@@ -483,7 +513,32 @@ const MainScreen = () => {
                     (currentTime - res.properties.timestampExternal) / 1000
                   }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
                   image={vesselIcon}
-                />
+                >
+                  <Callout
+                    onPress={() => {
+                      Linking.openURL(
+                        "https://www.marinetraffic.com/fi/ais/details/ships/mmsi:" +
+                          res.mmsi.toString()
+                      );
+                    }}
+                  >
+                    <Text
+                      style={{ fontWeight: "bold", justifyContent: "center" }}
+                    >
+                      {res.name}
+                    </Text>
+                    <Text>{`${Math.round(
+                      (currentTime - res.properties.timestampExternal) / 1000
+                    )} seconds ago`}</Text>
+                    <Text>{`MMSI: ${res.mmsi.toString()}`}</Text>
+                    <Text>
+                      {`Speed: ${res.properties.sog} knots / ` +
+                        `${Math.round(res.properties.sog * 1.852)} km/h`}
+                    </Text>
+                    <Text style={{ color: "blue" }}>Click for more info</Text>
+                    <Text style={{ color: "blue" }}>(opens browser)</Text>
+                  </Callout>
+                </Marker>
               );
             }
           })}
@@ -507,9 +562,54 @@ const MainScreen = () => {
                     res.boatName
                   }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
                   image={icon}
-                />
+                >
+                  <Callout>
+                    <Text
+                      style={{ fontWeight: "bold", justifyContent: "center" }}
+                    >
+                      {res.username}
+                    </Text>
+                    <Text>{`${Math.round(
+                      (Date.now() - res.timestamp) / 1000
+                    )} seconds ago`}</Text>
+                    <Text>{`Name: ${res.boatName}`}</Text>
+                    <Text>{`Type: ${res.boatType}`}</Text>
+                  </Callout>
+                </Marker>
               );
             }
+          })}
+          {nauticalWarnings.map((res, i) => {
+            return (
+              <Marker
+                key={i}
+                coordinate={{
+                  latitude: res.geometry.coordinates[1],
+                  longitude: res.geometry.coordinates[0],
+                }}
+                image={require("../../assets/warning.png")}
+              >
+                <Callout
+                  style={{ flex: 1, width: 250, height: 200 }}
+                  onPress={() =>
+                    props.navigation.navigate("Nautical Warning", {
+                      res,
+                    })
+                  }
+                >
+                  <H3>{res.properties.locationEn}</H3>
+                  <Text>{res.properties.contentsEn}</Text>
+                  <Text style={{ fontWeight: "bold" }}>
+                    {`Published: ${res.properties.publishingTime.substring(
+                      8,
+                      10
+                    )}.` +
+                      `${res.properties.publishingTime.substring(5, 7)}.` +
+                      `${res.properties.publishingTime.substring(0, 4)}`}
+                  </Text>
+                </Callout>
+              </Marker>
+            );
           })}
         </MapView>
         <View style={styles.speedometerContainer}>
@@ -534,6 +634,20 @@ const MainScreen = () => {
             labelFormatter={(number) => `${number}`}
           />
         </View>
+        <Fab
+          active={active}
+          direction="up"
+          containerStyle={{}}
+          style={styles.fabStyle}
+          position="bottomLeft"
+          onPress={() => toggleFollowUser()}
+        >
+          {followUserActive === false ? (
+            <Icon name="md-navigate" />
+          ) : (
+            <Icon name="md-close" />
+          )}
+        </Fab>
         <Fab
           active={active}
           direction="up"

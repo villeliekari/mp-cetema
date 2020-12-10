@@ -103,9 +103,16 @@ const InfoScreen = (props) => {
   return (
     <Container style={containerStyle}>
       <Content>
-        <Body>
+        <Card style={containerStyle}>
+          <CardItem
+            header
+            bordered
+            style={{ backgroundColor: colors.background }}
+          >
+            <Text>Nautical Warnings</Text>
+          </CardItem>
           {nauticalWarnings.map((warning, i) => {
-            if (i < 1) {
+            if (i <= 1) {
               return (
                 <Card key={i}>
                   <CardItem style={{ backgroundColor: colors.background }}>
@@ -139,12 +146,20 @@ const InfoScreen = (props) => {
           })}
           <Button
             block
-            light
+            info
+            transparent
             onPress={() => props.navigation.navigate("Nautical Warnings")}
           >
-            <Text style={textStyle}>Show all Nautical Warnings</Text>
+            <Text>Show all Nautical Warnings</Text>
           </Button>
-          <Card>
+          <Card style={containerStyle}>
+            <CardItem
+              header
+              bordered
+              style={{ backgroundColor: colors.background }}
+            >
+              <Text>Current Weather</Text>
+            </CardItem>
             <CardItem
               header
               button
@@ -234,7 +249,7 @@ const InfoScreen = (props) => {
               </Text>
             </CardItem>
           </Card>
-        </Body>
+        </Card>
       </Content>
     </Container>
   );
