@@ -520,7 +520,7 @@ const MainScreen = (props) => {
                   description={`${
                     (currentTime - res.properties.timestampExternal) / 1000
                   }s ago, shiptype: ${res.shipType}, ship name: ${res.name}`}
-                  image={vesselIcon}
+                  //image={vesselIcon}
                 >
                   <Callout
                     onPress={() => {
@@ -569,7 +569,7 @@ const MainScreen = (props) => {
                   description={`type: ${res.boatType}, name: ${
                     res.boatName
                   }, time: ${(Date.now() - res.timestamp) / 1000}s ago`}
-                  image={icon}
+                  //image={icon}
                 >
                   <Callout>
                     <Text
@@ -596,7 +596,7 @@ const MainScreen = (props) => {
                   latitude: res.geometry.coordinates[1],
                   longitude: res.geometry.coordinates[0],
                 }}
-                image={require("../../assets/warning.png")}
+                //image={require("../../assets/warning.png")}
               >
                 <Callout
                   style={{ flex: 1, width: 250, height: 200 }}
